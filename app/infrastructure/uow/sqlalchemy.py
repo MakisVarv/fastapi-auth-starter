@@ -2,10 +2,13 @@ from typing import Self
 
 from sqlalchemy.orm import sessionmaker
 
+from app.application.ports.user_repository import UserRepository
 from app.infrastructure.repositories.user_repository import SqlAlchemyUserRepository
 
 
 class SqlAlchemyUnitOfWork:
+    users: UserRepository
+
     def __init__(self, session_factory: sessionmaker) -> None:
         self.session_factory = session_factory
 
