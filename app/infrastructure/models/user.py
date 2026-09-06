@@ -6,13 +6,10 @@ from app.infrastructure.database.base import Base
 from app.infrastructure.models.mixins import TimestampMixin
 
 
-class User(TimestampMixin, Base):
+class UserModel(TimestampMixin, Base):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        primary_key=True,
-        default=uuid.uuid4,
-    )
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
 
     first_name: Mapped[str] = mapped_column(nullable=False)
 

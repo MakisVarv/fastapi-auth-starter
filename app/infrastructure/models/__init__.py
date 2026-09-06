@@ -1,1 +1,1 @@
-from app.infrastructure.models.user import User  # noqa: F401
+from app.infrastructure.models.user import UserModel  # noqa: F401
