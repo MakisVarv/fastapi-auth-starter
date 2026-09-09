@@ -1,16 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.error_handlers import email_already_registered_handler
+from app.api.error_handlers import (
+    register_exception_handlers,
+)
 from app.api.routes.auth import router as auth_router
-from app.application.errors import EmailAlreadyRegisteredError
 
 app = FastAPI()
+register_exception_handlers(app)
 
-app.add_exception_handler(
-    EmailAlreadyRegisteredError,
-    email_already_registered_handler,
-)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
