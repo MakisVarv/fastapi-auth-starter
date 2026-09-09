@@ -12,6 +12,7 @@ pydantic-settings = "*"
 psycopg = {extras = ["binary"], version = "*"}
 argon2-cffi = "*"
 email-validator = "*"
+pyjwt = "*"
 
 [dev-packages]
 pytest = "*"
