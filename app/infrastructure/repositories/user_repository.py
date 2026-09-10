@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,6 +10,21 @@ from app.infrastructure.models.user import UserModel
 class SqlAlchemyUserRepository:
     def __init__(self, session: Session):
         self.session = session
+
+    def get_by_id(self, user_id: UUID) -> User | None:
+
+        model = self.session.scalar(select(UserModel).where(UserModel.id == user_id))
+        if model is None:
+            return None
+
+        return User(
+            id=model.id,
+            first_name=model.first_name,
+            last_name=model.last_name,
+            email=model.email,
+            password_hash=model.password_hash,
+            is_active=model.is_active,
+        )
 
     def get_by_email(self, email: str) -> User | None:
         model = self.session.scalar(select(UserModel).where(UserModel.email == email))

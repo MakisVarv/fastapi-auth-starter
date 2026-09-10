@@ -8,3 +8,15 @@ class InvalidCredentialsError(Exception):
 
 class InactiveUserError(Exception):
     pass
+
+
+class InvalidRefreshTokenError(Exception):
+    pass
+
+
+class AuthSessionNotFoundError(Exception):
+    pass
+
+
+class RefreshTokenReplayError(Exception):
+    pass

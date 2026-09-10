@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from app.api.dependencies.use_cases import get_login_user, get_register_user
 from app.api.schemas.auth import (
@@ -9,6 +9,7 @@ from app.api.schemas.auth import (
 )
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.register_user import RegisterUser
+from app.infrastructure.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -37,11 +38,23 @@ def register(
 @router.post("/login", response_model=LoginResponse)
 def login(
     payload: LoginRequest,
+    response: Response,
     use_case: LoginUser = Depends(get_login_user),
 ) -> LoginResponse:
-    access_token = use_case.execute(
+    result = use_case.execute(
         email=str(payload.email),
         password=payload.password,
     )
 
-    return LoginResponse(access_token=access_token)
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+    )
+
+    return LoginResponse(
+        access_token=result.access_token,
+    )

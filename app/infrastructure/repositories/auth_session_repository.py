@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.errors import AuthSessionNotFoundError
 from app.domain.entities.auth_session import AuthSession
 from app.infrastructure.models.auth_session import AuthSessionModel
 
@@ -36,3 +37,13 @@ class SqlAlchemyAuthSessionRepository:
         )
 
         self.session.add(model)
+
+    def update(self, auth_session: AuthSession) -> None:
+        model = self.session.scalar(
+            select(AuthSessionModel).where(AuthSessionModel.id == auth_session.id)
+        )
+        if model is None:
+            raise AuthSessionNotFoundError()
+        model.current_refresh_jti = auth_session.current_refresh_jti
+        model.expires_at = auth_session.expires_at
+        model.revoked_at = auth_session.revoked_at
