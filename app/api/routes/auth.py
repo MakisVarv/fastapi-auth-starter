@@ -9,10 +9,6 @@ from app.api.schemas.auth import (
 )
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.register_user import RegisterUser
-from app.application.errors import (
-    InactiveUserError,
-    InvalidCredentialsError,
-)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
