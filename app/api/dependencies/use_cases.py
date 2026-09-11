@@ -1,4 +1,5 @@
 from app.application.use_cases.login_user import LoginUser
+from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
@@ -24,3 +25,9 @@ def get_login_user() -> LoginUser:
     return LoginUser(
         uow=uow, password_hasher=password_hasher, token_service=token_service
     )
+
+
+def get_refresh_session() -> RefreshSession:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    token_service = PyJWTTokenService()
+    return RefreshSession(uow=uow, token_service=token_service)

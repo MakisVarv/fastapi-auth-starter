@@ -1,13 +1,21 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Cookie, Depends, Response
 
-from app.api.dependencies.use_cases import get_login_user, get_register_user
+from app.api.dependencies.use_cases import (
+    get_login_user,
+    get_refresh_session,
+    get_register_user,
+)
 from app.api.schemas.auth import (
+    AccessTokenResponse,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
     RegisterResponse,
 )
+from app.api.schemas.user import UserResponse
+from app.application.errors import InvalidRefreshTokenError
 from app.application.use_cases.login_user import LoginUser
+from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
 from app.infrastructure.config import settings
 
@@ -56,5 +64,34 @@ def login(
     )
 
     return LoginResponse(
+        access_token=result.access_token,
+        user=UserResponse(
+            id=result.user.id,
+            first_name=result.user.first_name,
+            last_name=result.user.last_name,
+            email=result.user.email,
+            is_active=result.user.is_active,
+        ),
+    )
+
+
+@router.post("/refresh")
+def refresh(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    use_case: RefreshSession = Depends(get_refresh_session),
+) -> AccessTokenResponse:
+    if refresh_token is None:
+        raise InvalidRefreshTokenError()
+    result = use_case.execute(refresh_token=refresh_token)
+    response.set_cookie(
+        key="refresh_token",
+        value=result.refresh_token,
+        httponly=True,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+    )
+    return AccessTokenResponse(
         access_token=result.access_token,
     )
