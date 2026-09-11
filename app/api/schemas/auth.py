@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.api.schemas.user import UserResponse
+
 
 class RegisterRequest(BaseModel):
     first_name: str
@@ -23,6 +25,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class LoginResponse(BaseModel):
+class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class LoginResponse(AccessTokenResponse):
+    user: UserResponse

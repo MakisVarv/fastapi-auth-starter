@@ -6,12 +6,14 @@ from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.token_service import TokenService
 from app.application.ports.unit_of_work import UnitOfWork
 from app.domain.entities.auth_session import AuthSession
+from app.domain.entities.user import User
 
 
 @dataclass(frozen=True)
 class LoginResult:
     access_token: str
     refresh_token: str
+    user: User
 
 
 class LoginUser:
@@ -49,6 +51,5 @@ class LoginUser:
             self.uow.auth_sessions.add(auth_session)
             self.uow.commit()
             return LoginResult(
-                access_token=access_token,
-                refresh_token=refresh_token.token,
+                access_token=access_token, refresh_token=refresh_token.token, user=user
             )
