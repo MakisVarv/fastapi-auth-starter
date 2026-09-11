@@ -5,6 +5,8 @@ from app.application.errors import (
     EmailAlreadyRegisteredError,
     InactiveUserError,
     InvalidCredentialsError,
+    InvalidRefreshTokenError,
+    RefreshTokenReplayError,
 )
 
 ERROR_RESPONSES = {
@@ -19,6 +21,14 @@ ERROR_RESPONSES = {
     InactiveUserError: (
         status.HTTP_403_FORBIDDEN,
         "Account is inactive.",
+    ),
+    InvalidRefreshTokenError: (
+        status.HTTP_401_UNAUTHORIZED,
+        "Invalid refresh token.",
+    ),
+    RefreshTokenReplayError: (
+        status.HTTP_401_UNAUTHORIZED,
+        "Invalid refresh token.",
     ),
 }
 
