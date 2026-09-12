@@ -10,6 +10,10 @@ class InactiveUserError(Exception):
     pass
 
 
+class InvalidAccessTokenError(Exception):
+    pass
+
+
 class InvalidRefreshTokenError(Exception):
     pass
 

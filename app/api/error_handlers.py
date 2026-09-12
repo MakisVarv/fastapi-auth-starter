@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from app.application.errors import (
     EmailAlreadyRegisteredError,
     InactiveUserError,
+    InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     RefreshTokenReplayError,
@@ -25,6 +26,10 @@ ERROR_RESPONSES = {
     InvalidRefreshTokenError: (
         status.HTTP_401_UNAUTHORIZED,
         "Invalid refresh token.",
+    ),
+    InvalidAccessTokenError: (
+        status.HTTP_401_UNAUTHORIZED,
+        "Invalid access token.",
     ),
     RefreshTokenReplayError: (
         status.HTTP_401_UNAUTHORIZED,

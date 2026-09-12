@@ -3,8 +3,12 @@ from uuid import UUID, uuid4
 
 import jwt
 
-from app.application.errors import InvalidRefreshTokenError
-from app.application.ports.token_service import IssuedRefreshToken, RefreshTokenClaims
+from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
+from app.application.ports.token_service import (
+    AccessTokenClaims,
+    IssuedRefreshToken,
+    RefreshTokenClaims,
+)
 from app.infrastructure.config import settings
 
 
@@ -70,3 +74,21 @@ class PyJWTTokenService:
             session_id=session_id,
             jti=jti,
         )
+
+    def decode_access_token(self, token: str) -> AccessTokenClaims:
+        try:
+            payload = jwt.decode(
+                token,
+                settings.JWT_SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
+            )
+        except jwt.InvalidTokenError as exc:
+            raise InvalidAccessTokenError() from exc
+        if payload.get("type") != "access":
+            raise InvalidAccessTokenError()
+        try:
+            user_id = UUID(payload["sub"])
+        except (KeyError, ValueError, TypeError) as exc:
+            raise InvalidAccessTokenError() from exc
+
+        return AccessTokenClaims(user_id)

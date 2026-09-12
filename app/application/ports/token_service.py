@@ -18,6 +18,11 @@ class RefreshTokenClaims:
     jti: str
 
 
+@dataclass(frozen=True)
+class AccessTokenClaims:
+    user_id: UUID
+
+
 class TokenService(Protocol):
     def create_access_token(self, user_id: UUID) -> str: ...
 
@@ -28,3 +33,4 @@ class TokenService(Protocol):
     ) -> IssuedRefreshToken: ...
 
     def decode_refresh_token(self, token: str) -> RefreshTokenClaims: ...
+    def decode_access_token(self, token: str) -> AccessTokenClaims: ...
