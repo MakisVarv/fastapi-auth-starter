@@ -1,3 +1,4 @@
+from app.application.use_cases.get_current_user import GetCurrentUser
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
@@ -31,3 +32,9 @@ def get_refresh_session() -> RefreshSession:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     token_service = PyJWTTokenService()
     return RefreshSession(uow=uow, token_service=token_service)
+
+
+def get_current_user_use_case() -> GetCurrentUser:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    token_service = PyJWTTokenService()
+    return GetCurrentUser(uow=uow, token_service=token_service)

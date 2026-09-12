@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Cookie, Depends, Response
 
+from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.use_cases import (
     get_login_user,
     get_refresh_session,
@@ -17,6 +18,7 @@ from app.application.errors import InvalidRefreshTokenError
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
+from app.domain.entities.user import User
 from app.infrastructure.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -94,4 +96,18 @@ def refresh(
     )
     return AccessTokenResponse(
         access_token=result.access_token,
+    )
+
+
+@router.get("/me", response_model=UserResponse)
+def me(
+    response: Response, current_user: User = Depends(get_current_user)
+) -> UserResponse:
+
+    return UserResponse(
+        id=current_user.id,
+        first_name=current_user.first_name,
+        last_name=current_user.last_name,
+        email=current_user.email,
+        is_active=current_user.is_active,
     )
