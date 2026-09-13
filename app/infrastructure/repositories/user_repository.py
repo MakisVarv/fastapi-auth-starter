@@ -58,7 +58,7 @@ class SqlAlchemyUserRepository:
         self.session.add(model)
 
     def update(self, user: User) -> None:
-        model = self.get_by_id(user.id)
+        model = self.session.scalar(select(UserModel).where(UserModel.id == user.id))
         if model is None:
             raise UserNotFoundError()
         model.first_name = user.first_name
