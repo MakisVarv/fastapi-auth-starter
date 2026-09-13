@@ -2,6 +2,7 @@ from uuid import UUID
 
 from app.application.errors import UserNotFoundError
 from app.application.ports.unit_of_work import UnitOfWork
+from app.domain.entities.user import User
 
 
 class UpdateCurrentUser:
@@ -20,3 +21,4 @@ def execute(self, user_id: UUID, updates: dict[str, str | None]) -> User:
                 setattr(user, field, value)
         self.uow.users.update(user)
         self.uow.commit()
+        return user
