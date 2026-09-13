@@ -3,6 +3,7 @@ from fastapi import APIRouter, Cookie, Depends, Response
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.use_cases import (
     get_login_user,
+    get_logout_session,
     get_refresh_session,
     get_register_user,
 )
@@ -13,9 +14,11 @@ from app.api.schemas.auth import (
     RegisterRequest,
     RegisterResponse,
 )
+from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
 from app.application.errors import InvalidRefreshTokenError
 from app.application.use_cases.login_user import LoginUser
+from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
 from app.domain.entities.user import User
@@ -29,6 +32,7 @@ def register(
     payload: RegisterRequest,
     use_case: RegisterUser = Depends(get_register_user),
 ) -> RegisterResponse:
+
     user = use_case.execute(
         first_name=payload.first_name,
         last_name=payload.last_name,
@@ -51,6 +55,7 @@ def login(
     response: Response,
     use_case: LoginUser = Depends(get_login_user),
 ) -> LoginResponse:
+
     result = use_case.execute(
         email=str(payload.email),
         password=payload.password,
@@ -77,15 +82,34 @@ def login(
     )
 
 
-@router.post("/refresh")
+@router.post("/logout", response_model=MessageResponse)
+def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    use_case: LogoutSession = Depends(get_logout_session),
+) -> MessageResponse:
+
+    if refresh_token is None:
+        raise InvalidRefreshTokenError()
+
+    use_case.execute(refresh_token=refresh_token)
+    response.delete_cookie("refresh_token")
+
+    return MessageResponse(message="Logged out successfully.")
+
+
+@router.post("/refresh", response_model=AccessTokenResponse)
 def refresh(
     response: Response,
     refresh_token: str | None = Cookie(default=None),
     use_case: RefreshSession = Depends(get_refresh_session),
 ) -> AccessTokenResponse:
+
     if refresh_token is None:
         raise InvalidRefreshTokenError()
+
     result = use_case.execute(refresh_token=refresh_token)
+
     response.set_cookie(
         key="refresh_token",
         value=result.refresh_token,
@@ -94,6 +118,7 @@ def refresh(
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
     )
+
     return AccessTokenResponse(
         access_token=result.access_token,
     )

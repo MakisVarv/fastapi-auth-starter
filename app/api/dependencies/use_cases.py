@@ -1,5 +1,6 @@
 from app.application.use_cases.get_current_user import GetCurrentUser
 from app.application.use_cases.login_user import LoginUser
+from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
 from app.infrastructure.database.session import SessionFactory
@@ -38,3 +39,9 @@ def get_current_user_use_case() -> GetCurrentUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     token_service = PyJWTTokenService()
     return GetCurrentUser(uow=uow, token_service=token_service)
+
+
+def get_logout_session() -> LogoutSession:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    token_service = PyJWTTokenService()
+    return LogoutSession(uow=uow, token_service=token_service)
