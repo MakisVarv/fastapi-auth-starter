@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.errors import UserNotFoundError
 from app.domain.entities.user import User
 from app.infrastructure.models.user import UserModel
 
@@ -55,3 +56,14 @@ class SqlAlchemyUserRepository:
         )
 
         self.session.add(model)
+
+    def update(self, user: User) -> None:
+        model = self.get_by_id(user.id)
+        if model is None:
+            raise UserNotFoundError()
+        model.first_name = user.first_name
+        model.last_name = user.last_name
+        model.email = user.email
+        model.phone = user.phone
+        model.password_hash = user.password_hash
+        model.is_active = user.is_active

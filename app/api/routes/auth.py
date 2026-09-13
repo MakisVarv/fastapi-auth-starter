@@ -6,12 +6,14 @@ from app.api.dependencies.use_cases import (
     get_logout_session,
     get_refresh_session,
     get_register_user,
+    get_update_current_user,
 )
 from app.api.schemas.auth import (
     AccessTokenResponse,
     LoginRequest,
     LoginResponse,
     RegisterRequest,
+    UpdateMeRequest,
 )
 from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
@@ -20,6 +22,7 @@ from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
+from app.application.use_cases.update_current_user import UpdateCurrentUser
 from app.domain.entities.user import User
 from app.infrastructure.config import settings
 
@@ -138,4 +141,24 @@ def me(
         email=current_user.email,
         phone=current_user.phone,
         is_active=current_user.is_active,
+    )
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_me(
+    payload: UpdateMeRequest,
+    current_user: User = Depends(get_current_user),
+    use_case: UpdateCurrentUser = Depends(get_update_current_user),
+) -> UserResponse:
+    updates = payload.model_dump(exclude_unset=True)
+
+    new_user = use_case.execute(user_id=current_user.id, updates=updates)
+
+    return UserResponse(
+        id=new_user.id,
+        first_name=new_user.first_name,
+        last_name=new_user.last_name,
+        email=new_user.email,
+        phone=new_user.phone,
+        is_active=new_user.is_active,
     )

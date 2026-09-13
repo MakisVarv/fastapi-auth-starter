@@ -3,6 +3,7 @@ from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
+from app.application.use_cases.update_current_user import UpdateCurrentUser
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
 from app.infrastructure.security.token_service import PyJWTTokenService
@@ -45,3 +46,8 @@ def get_logout_session() -> LogoutSession:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     token_service = PyJWTTokenService()
     return LogoutSession(uow=uow, token_service=token_service)
+
+
+def get_update_current_user() -> UpdateCurrentUser:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return UpdateCurrentUser(uow=uow)
