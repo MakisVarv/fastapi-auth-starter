@@ -19,6 +19,7 @@ class RegisterUser:
         last_name: str,
         email: str,
         password: str,
+        phone: str | None = None,
     ) -> User:
         with self.uow:
             existing_user = self.uow.users.get_by_email(email)
@@ -32,6 +33,7 @@ class RegisterUser:
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
+                phone=phone,
                 password_hash=password_hash,
             )
 

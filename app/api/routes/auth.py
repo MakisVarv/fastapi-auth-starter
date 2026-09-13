@@ -12,7 +12,6 @@ from app.api.schemas.auth import (
     LoginRequest,
     LoginResponse,
     RegisterRequest,
-    RegisterResponse,
 )
 from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
@@ -27,11 +26,11 @@ from app.infrastructure.config import settings
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=RegisterResponse)
+@router.post("/register", response_model=UserResponse)
 def register(
     payload: RegisterRequest,
     use_case: RegisterUser = Depends(get_register_user),
-) -> RegisterResponse:
+) -> UserResponse:
 
     user = use_case.execute(
         first_name=payload.first_name,
@@ -40,11 +39,12 @@ def register(
         password=payload.password,
     )
 
-    return RegisterResponse(
+    return UserResponse(
         id=user.id,
         first_name=user.first_name,
         last_name=user.last_name,
         email=user.email,
+        phone=user.phone,
         is_active=user.is_active,
     )
 
@@ -77,6 +77,7 @@ def login(
             first_name=result.user.first_name,
             last_name=result.user.last_name,
             email=result.user.email,
+            phone=result.user.phone,
             is_active=result.user.is_active,
         ),
     )
@@ -134,5 +135,6 @@ def me(
         first_name=current_user.first_name,
         last_name=current_user.last_name,
         email=current_user.email,
+        phone=current_user.phone,
         is_active=current_user.is_active,
     )

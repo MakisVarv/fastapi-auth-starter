@@ -21,6 +21,8 @@ class UserModel(TimestampMixin, Base):
         index=True,
     )
 
+    phone: Mapped[str | None] = mapped_column(nullable=True)
+
     password_hash: Mapped[str] = mapped_column(
         nullable=False,
     )

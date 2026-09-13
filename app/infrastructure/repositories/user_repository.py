@@ -22,6 +22,7 @@ class SqlAlchemyUserRepository:
             first_name=model.first_name,
             last_name=model.last_name,
             email=model.email,
+            phone=model.phone,
             password_hash=model.password_hash,
             is_active=model.is_active,
         )
@@ -36,6 +37,7 @@ class SqlAlchemyUserRepository:
             first_name=model.first_name,
             last_name=model.last_name,
             email=model.email,
+            phone=model.phone,
             password_hash=model.password_hash,
             is_active=model.is_active,
         )
@@ -47,6 +49,7 @@ class SqlAlchemyUserRepository:
             first_name=user.first_name,
             last_name=user.last_name,
             email=user.email,
+            phone=user.phone,
             password_hash=user.password_hash,
             is_active=user.is_active,
         )
