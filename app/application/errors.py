@@ -24,3 +24,7 @@ class AuthSessionNotFoundError(Exception):
 
 class RefreshTokenReplayError(Exception):
     pass
+
+
+class UserNotFoundError(Exception):
+    pass
