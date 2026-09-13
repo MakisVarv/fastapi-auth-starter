@@ -37,6 +37,7 @@ def register(
         last_name=payload.last_name,
         email=str(payload.email),
         password=payload.password,
+        phone=payload.phone,
     )
 
     return UserResponse(
