@@ -22,6 +22,6 @@ class RoleModel(BaseModel):
     level: Mapped[int] = mapped_column(Integer, nullable=False)
 
     users: Mapped[list["UserModel"]] = relationship(
-        "User",
+        "UserModel",
         back_populates="role",
     )

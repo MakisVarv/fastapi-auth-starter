@@ -37,6 +37,6 @@ class UserModel(BaseModel):
     )
 
     role: Mapped["RoleModel"] = relationship(
-        "Role",
+        "RoleModel",
         back_populates="users",
     )
