@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import BaseModel
 from app.infrastructure.models.user import UserModel
+
+if TYPE_CHECKING:
+    from app.infrastructure.models.user import UserModel
 
 
 class RoleModel(BaseModel):
