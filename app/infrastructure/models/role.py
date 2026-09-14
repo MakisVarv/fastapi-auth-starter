@@ -1,11 +1,11 @@
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.domain.entities.user import User
 from app.infrastructure.database.base import BaseModel
+from app.infrastructure.models.user import UserModel
 
 
-class Role(BaseModel):
+class RoleModel(BaseModel):
 
     __tablename__ = "roles"
 
@@ -21,7 +21,7 @@ class Role(BaseModel):
     )
     level: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    users: Mapped[list["User"]] = relationship(
+    users: Mapped[list["UserModel"]] = relationship(
         "User",
         back_populates="role",
     )

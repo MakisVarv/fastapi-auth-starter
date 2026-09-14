@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import BaseModel
-from app.infrastructure.models.role import Role
+from app.infrastructure.models.role import RoleModel
 
 
 class UserModel(BaseModel):
@@ -36,7 +36,7 @@ class UserModel(BaseModel):
         nullable=False,
     )
 
-    role: Mapped["Role"] = relationship(
+    role: Mapped["RoleModel"] = relationship(
         "Role",
         back_populates="users",
     )
