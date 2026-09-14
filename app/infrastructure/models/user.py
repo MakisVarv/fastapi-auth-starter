@@ -1,8 +1,10 @@
 import uuid
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import BaseModel
+from app.infrastructure.models.role import Role
 
 
 class UserModel(BaseModel):
@@ -27,4 +29,14 @@ class UserModel(BaseModel):
     is_active: Mapped[bool] = mapped_column(
         nullable=False,
         default=True,
+    )
+
+    role_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("roles.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+
+    role: Mapped["Role"] = relationship(
+        "Role",
+        back_populates="users",
     )
