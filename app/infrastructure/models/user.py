@@ -8,8 +8,6 @@ from app.infrastructure.database.base import BaseModel
 class UserModel(BaseModel):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
-
     first_name: Mapped[str] = mapped_column(nullable=False)
 
     last_name: Mapped[str] = mapped_column(nullable=False)

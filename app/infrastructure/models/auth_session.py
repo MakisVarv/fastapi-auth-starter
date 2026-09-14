@@ -10,8 +10,6 @@ from app.infrastructure.database.base import BaseModel
 class AuthSessionModel(BaseModel):
     __tablename__ = "auth_sessions"
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
-
     user_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id"),
         nullable=False,
