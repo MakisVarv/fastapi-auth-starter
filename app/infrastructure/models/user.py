@@ -2,11 +2,10 @@ import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.infrastructure.database.base import Base
-from app.infrastructure.models.mixins import TimestampMixin
+from app.infrastructure.database.base import BaseModel
 
 
-class UserModel(TimestampMixin, Base):
+class UserModel(BaseModel):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True)

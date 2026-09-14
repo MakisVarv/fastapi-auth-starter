@@ -4,11 +4,10 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.infrastructure.database.base import Base
-from app.infrastructure.models.mixins import TimestampMixin
+from app.infrastructure.database.base import BaseModel
 
 
-class AuthSessionModel(TimestampMixin, Base):
+class AuthSessionModel(BaseModel):
     __tablename__ = "auth_sessions"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
