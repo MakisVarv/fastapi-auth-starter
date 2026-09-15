@@ -30,5 +30,5 @@ class UserNotFoundError(Exception):
     pass
 
 
-class RoleNotFoundError(Exception):
+class DefaultRoleNotFoundError(Exception):
     pass

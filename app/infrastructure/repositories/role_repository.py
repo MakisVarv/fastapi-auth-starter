@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.application.ports.role_repository import Role
 from app.domain.entities.permission import Permission
+from app.domain.entities.role import Role
 from app.infrastructure.models import RoleModel
 
 
