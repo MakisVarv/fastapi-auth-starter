@@ -4,8 +4,10 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.database.base import BaseModel
+from app.infrastructure.models.role_permission import role_permissions
 
 if TYPE_CHECKING:
+    from app.infrastructure.models.permission import PermissionModel
     from app.infrastructure.models.user import UserModel
 
 
@@ -24,6 +26,12 @@ class RoleModel(BaseModel):
         nullable=True,
     )
     level: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    permissions: Mapped[list["PermissionModel"]] = relationship(
+        "PermissionModel",
+        secondary=role_permissions,
+        back_populates="roles",
+    )
 
     users: Mapped[list["UserModel"]] = relationship(
         "UserModel",
