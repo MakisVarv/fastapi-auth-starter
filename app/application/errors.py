@@ -28,3 +28,7 @@ class RefreshTokenReplayError(Exception):
 
 class UserNotFoundError(Exception):
     pass
+
+
+class RoleNotFoundError(Exception):
+    pass

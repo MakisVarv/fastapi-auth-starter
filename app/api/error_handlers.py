@@ -9,11 +9,13 @@ from app.application.errors import (
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     RefreshTokenReplayError,
+    RoleNotFoundError,
     UserNotFoundError,
 )
 
 ERROR_RESPONSES = {
     UserNotFoundError: (status.HTTP_404_NOT_FOUND, "User not found!"),
+    RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
     EmailAlreadyRegisteredError: (
         status.HTTP_409_CONFLICT,
         "Email is already registered.",

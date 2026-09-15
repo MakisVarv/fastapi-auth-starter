@@ -1,4 +1,4 @@
-from app.application.errors import EmailAlreadyRegisteredError
+from app.application.errors import EmailAlreadyRegisteredError, RoleNotFoundError
 from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.unit_of_work import UnitOfWork
 from app.domain.entities.user import User
@@ -23,7 +23,9 @@ class RegisterUser:
     ) -> User:
         with self.uow:
             existing_user = self.uow.users.get_by_email(email)
-
+            role = self.uow.roles.get_by_name("User")
+            if role is None:
+                raise RoleNotFoundError
             if existing_user is not None:
                 raise EmailAlreadyRegisteredError
 
@@ -33,6 +35,7 @@ class RegisterUser:
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
+                role_id=role.id,
                 phone=phone,
                 password_hash=password_hash,
             )
