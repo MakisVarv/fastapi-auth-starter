@@ -52,6 +52,7 @@ class SqlAlchemyUserRepository:
             first_name=user.first_name,
             last_name=user.last_name,
             email=user.email,
+            role_id=user.role_id,
             phone=user.phone,
             password_hash=user.password_hash,
             is_active=user.is_active,
@@ -66,6 +67,7 @@ class SqlAlchemyUserRepository:
         model.first_name = user.first_name
         model.last_name = user.last_name
         model.email = user.email
+        model.role_id = user.role_id
         model.phone = user.phone
         model.password_hash = user.password_hash
         model.is_active = user.is_active
