@@ -24,6 +24,7 @@ class SqlAlchemyUserRepository:
             last_name=model.last_name,
             email=model.email,
             phone=model.phone,
+            role_id=model.role_id,
             password_hash=model.password_hash,
             is_active=model.is_active,
         )
@@ -39,6 +40,7 @@ class SqlAlchemyUserRepository:
             last_name=model.last_name,
             email=model.email,
             phone=model.phone,
+            role_id=model.role_id,
             password_hash=model.password_hash,
             is_active=model.is_active,
         )

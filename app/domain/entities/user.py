@@ -8,7 +8,7 @@ class User:
     last_name: str
     email: str
     password_hash: str
+    role_id: UUID
     phone: str | None = None
-
     id: UUID = field(default_factory=uuid4)
     is_active: bool = True
