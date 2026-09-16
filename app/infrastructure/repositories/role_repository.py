@@ -1,28 +1,24 @@
-from sqlalchemy import select
+from typing import Tuple
+
+from sqlalchemy import Select
 from sqlalchemy.orm import Session, selectinload
 
 from app.domain.entities.permission import Permission
 from app.domain.entities.role import Role
 from app.infrastructure.models import RoleModel
+from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 
-class SqlAlchemyRoleRepository:
+class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
+    model_type = RoleModel
 
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self.session = session
 
-    def get_by_name(self, name: str) -> Role | None:
+    def _base_query(self) -> Select[Tuple[RoleModel]]:
+        return super()._base_query().options(selectinload(RoleModel.permissions))
 
-        stmt = (
-            select(RoleModel)
-            .options(selectinload(RoleModel.permissions))
-            .where(RoleModel.name == name)
-        )
-
-        model = self.session.execute(stmt).scalar_one_or_none()
-        if model is None:
-            return None
-
+    def _to_domain(self, model: RoleModel) -> Role:
         return Role(
             id=model.id,
             name=model.name,
@@ -37,3 +33,13 @@ class SqlAlchemyRoleRepository:
                 for permission_model in model.permissions
             ],
         )
+
+    def get_by_name(self, name: str) -> Role | None:
+
+        stmt = self._base_query().where(RoleModel.name == name)
+
+        model = self.session.execute(stmt).scalar_one_or_none()
+        if model is None:
+            return None
+
+        return self._to_domain(model=model)

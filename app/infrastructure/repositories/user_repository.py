@@ -1,16 +1,27 @@
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.application.errors import UserNotFoundError
 from app.domain.entities.user import User
 from app.infrastructure.models.user import UserModel
+from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 
-class SqlAlchemyUserRepository:
-    def __init__(self, session: Session):
-        self.session = session
+class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
+    model_type = UserModel
+
+    def _to_domain(self, model: UserModel) -> User:
+        return User(
+            id=model.id,
+            first_name=model.first_name,
+            last_name=model.last_name,
+            email=model.email,
+            phone=model.phone,
+            role_id=model.role_id,
+            password_hash=model.password_hash,
+            is_active=model.is_active,
+        )
 
     def get_by_id(self, user_id: UUID) -> User | None:
 
@@ -18,32 +29,12 @@ class SqlAlchemyUserRepository:
         if model is None:
             return None
 
-        return User(
-            id=model.id,
-            first_name=model.first_name,
-            last_name=model.last_name,
-            email=model.email,
-            phone=model.phone,
-            role_id=model.role_id,
-            password_hash=model.password_hash,
-            is_active=model.is_active,
-        )
-
     def get_by_email(self, email: str) -> User | None:
         model = self.session.scalar(select(UserModel).where(UserModel.email == email))
         if model is None:
             return None
 
-        return User(
-            id=model.id,
-            first_name=model.first_name,
-            last_name=model.last_name,
-            email=model.email,
-            phone=model.phone,
-            role_id=model.role_id,
-            password_hash=model.password_hash,
-            is_active=model.is_active,
-        )
+        return self._to_domain(model)
 
     def add(self, user: User) -> None:
 
