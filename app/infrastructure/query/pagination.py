@@ -9,6 +9,15 @@ from app.infrastructure.database.base import BaseModel
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
+class PaginationMetadata(TypedDict):
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+    has_next: bool
+    has_previous: bool
+
+
 class Pagination:
 
     @staticmethod
@@ -40,12 +49,3 @@ class Pagination:
             "has_next": page < total_pages,
             "has_previous": page > 1,
         }
-
-
-class PaginationMetadata(TypedDict):
-    page: int
-    page_size: int
-    total: int
-    total_pages: int
-    has_next: bool
-    has_previous: bool

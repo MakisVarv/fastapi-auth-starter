@@ -12,9 +12,8 @@ def apply_sorting(
 
     order = sort_column.desc() if options.descending else sort_column.asc()
 
-    statement = statement.order_by(
-        order,
-        secondary_column.asc(),
-    )
+    statement = statement.order_by(order)
+    if secondary_column is not sort_column:
+        statement = statement.order_by(secondary_column.asc())
 
     return statement
