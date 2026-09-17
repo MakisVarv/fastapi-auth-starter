@@ -1,9 +1,12 @@
 from sqlalchemy import func, select
 
 from app.application.common.pagination import Page
+from app.application.common.sorting import SortOptions
 from app.application.errors import UserNotFoundError
 from app.domain.entities.user import User
+from app.infrastructure.models import RoleModel
 from app.infrastructure.models.user import UserModel
+from app.infrastructure.query.sorting import apply_sorting
 from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 
@@ -27,14 +30,38 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
         *,
         page: int,
         page_size: int,
+        sort_options: SortOptions,
     ) -> Page[User]:
         statement = self._base_query()
         count_statement = select(func.count()).select_from(UserModel)
+        sort_columns = {
+            "id": UserModel.id,
+            "first_name": UserModel.first_name,
+            "last_name": UserModel.last_name,
+            "email": UserModel.email,
+            "is_active": UserModel.is_active,
+            "created_at": UserModel.created_at,
+            "role": RoleModel.name,
+        }
+
+        if sort_options.field == "role":
+            statement = statement.join(
+                RoleModel,
+                UserModel.role_id == RoleModel.id,
+            )
+
+        statement = apply_sorting(
+            statement,
+            sort_columns=sort_columns,
+            options=sort_options,
+            secondary_column=UserModel.id,
+        )
+
         return self._paginate(
             statement=statement,
             count_statement=count_statement,
-            page_size=page_size,
             page=page,
+            page_size=page_size,
         )
 
     def get_by_email(self, email: str) -> User | None:

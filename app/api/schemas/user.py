@@ -1,9 +1,9 @@
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
 
 from app.api.schemas.common import PaginationParams
-from typing import Literal
 
 
 class UserResponse(BaseModel):
@@ -29,4 +29,4 @@ class UserListParams(PaginationParams):
         "-is_active",
         "created_at",
         "-created_at",
-    ]
+    ] = "-created_at"
