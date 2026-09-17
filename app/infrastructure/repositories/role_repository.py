@@ -12,9 +12,6 @@ from app.infrastructure.repositories.base import SqlAlchemyRepository
 class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
     model_type = RoleModel
 
-    def __init__(self, session: Session) -> None:
-        self.session = session
-
     def _base_query(self) -> Select[Tuple[RoleModel]]:
         return super()._base_query().options(selectinload(RoleModel.permissions))
 

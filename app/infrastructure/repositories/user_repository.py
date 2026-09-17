@@ -23,12 +23,6 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
             is_active=model.is_active,
         )
 
-    def get_by_id(self, user_id: UUID) -> User | None:
-
-        model = self.session.scalar(select(UserModel).where(UserModel.id == user_id))
-        if model is None:
-            return None
-
     def get_by_email(self, email: str) -> User | None:
         model = self.session.scalar(select(UserModel).where(UserModel.email == email))
         if model is None:
