@@ -10,11 +10,3 @@ class UserResponse(BaseModel):
     email: EmailStr
     phone: str | None = None
     is_active: bool
-
-
-class UserListResponse(BaseModel):
-    items: list[UserResponse]
-    page: int
-    page_size: int
-    total: int
-    pages: int

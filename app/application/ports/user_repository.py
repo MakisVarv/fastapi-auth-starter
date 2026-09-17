@@ -1,11 +1,18 @@
 import uuid
 from typing import Protocol
 
+from app.application.common.pagination import Page
 from app.domain.entities.user import User
 
 
 class UserRepository(Protocol):
 
+    def list_paginated(
+        self,
+        *,
+        page: int,
+        page_size: int,
+    ) -> Page[User]: ...
     def get_by_id(self, user_id: uuid.UUID, /) -> User | None: ...
 
     def get_by_email(self, email: str) -> User | None: ...

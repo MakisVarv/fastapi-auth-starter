@@ -5,7 +5,9 @@ from uuid import UUID
 from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
+from app.application.common.pagination import Page
 from app.infrastructure.database.base import BaseModel
+from app.infrastructure.query.pagination import Pagination
 
 DomainT = TypeVar("DomainT")
 ModelT = TypeVar("ModelT", bound=BaseModel)
@@ -16,6 +18,27 @@ class SqlAlchemyRepository(Generic[DomainT, ModelT], ABC):
 
     def __init__(self, session: Session) -> None:
         self.session = session
+
+    def _paginate(
+        self,
+        statement: Select[tuple[ModelT]],
+        count_statement: Select[tuple[int]],
+        *,
+        page: int,
+        page_size: int,
+    ) -> Page[DomainT]:
+        models, metadata = Pagination.paginate(
+            session=self.session,
+            statement=statement,
+            count_statement=count_statement,
+            page=page,
+            page_size=page_size,
+        )
+        items = [self._to_domain(model) for model in models]
+        return Page(
+            items=items,
+            **metadata,
+        )
 
     def get_by_id(self, entity_id: UUID) -> DomainT | None:
         model = self.session.scalar(

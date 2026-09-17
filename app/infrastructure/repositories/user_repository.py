@@ -1,5 +1,6 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 
+from app.application.common.pagination import Page
 from app.application.errors import UserNotFoundError
 from app.domain.entities.user import User
 from app.infrastructure.models.user import UserModel
@@ -19,6 +20,21 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
             role_id=model.role_id,
             password_hash=model.password_hash,
             is_active=model.is_active,
+        )
+
+    def list_paginated(
+        self,
+        *,
+        page: int,
+        page_size: int,
+    ) -> Page[User]:
+        statement = self._base_query()
+        count_statement = select(func.count()).select_from(UserModel)
+        return self._paginate(
+            statement=statement,
+            count_statement=count_statement,
+            page_size=page_size,
+            page=page,
         )
 
     def get_by_email(self, email: str) -> User | None:
