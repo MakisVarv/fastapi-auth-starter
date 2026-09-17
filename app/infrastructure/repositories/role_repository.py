@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from sqlalchemy import Select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
 from app.domain.entities.permission import Permission
 from app.domain.entities.role import Role
