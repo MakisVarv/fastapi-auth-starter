@@ -3,19 +3,24 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.application.errors import (
-    DefaultRoleNotFoundError,
     EmailAlreadyRegisteredError,
     InactiveUserError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     RefreshTokenReplayError,
+    RegistrationRoleNotFoundError,
+    RoleNotFoundError,
     UserNotFoundError,
 )
 
 ERROR_RESPONSES = {
     UserNotFoundError: (status.HTTP_404_NOT_FOUND, "User not found!"),
-    DefaultRoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
+    RegistrationRoleNotFoundError: (
+        status.HTTP_404_NOT_FOUND,
+        "Selected Role not found!",
+    ),
+    RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
     EmailAlreadyRegisteredError: (
         status.HTTP_409_CONFLICT,
         "Email is already registered.",
