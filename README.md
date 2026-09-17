@@ -2,7 +2,7 @@
 
 > **Status:** In progress
 
-A backend-focused authentication and authorization system built with **FastAPI** to practice production-oriented application structure, explicit dependency boundaries, and maintainable security workflows.
+A reusable backend-focused authentication and authorization system built with **FastAPI** to practice production-oriented application structure, explicit dependency boundaries, and maintainable security workflows.
 
 The project is intentionally designed around **Clean Architecture principles** rather than framework-first organization, keeping domain and application logic independent from FastAPI, SQLAlchemy, and other infrastructure concerns.
 
