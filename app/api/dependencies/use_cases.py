@@ -3,6 +3,7 @@ from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
 from app.application.use_cases.register_user import RegisterUser
+from app.application.use_cases.require_permission import RequirePermission
 from app.application.use_cases.update_current_user import UpdateCurrentUser
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
@@ -51,3 +52,8 @@ def get_logout_session() -> LogoutSession:
 def get_update_current_user() -> UpdateCurrentUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return UpdateCurrentUser(uow=uow)
+
+
+def get_require_permission() -> RequirePermission:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return RequirePermission(uow=uow)

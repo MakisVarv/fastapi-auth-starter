@@ -8,6 +8,7 @@ from app.application.errors import (
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
+    PermissionDeniedError,
     RefreshTokenReplayError,
     RegistrationRoleNotFoundError,
     RoleNotFoundError,
@@ -17,8 +18,8 @@ from app.application.errors import (
 ERROR_RESPONSES = {
     UserNotFoundError: (status.HTTP_404_NOT_FOUND, "User not found!"),
     RegistrationRoleNotFoundError: (
-        status.HTTP_404_NOT_FOUND,
-        "Selected Role not found!",
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        "Default registration role is not configured.",
     ),
     RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
     EmailAlreadyRegisteredError: (
@@ -44,6 +45,10 @@ ERROR_RESPONSES = {
     RefreshTokenReplayError: (
         status.HTTP_401_UNAUTHORIZED,
         "Invalid refresh token.",
+    ),
+    PermissionDeniedError: (
+        status.HTTP_403_FORBIDDEN,
+        "Permission denied.",
     ),
 }
 
