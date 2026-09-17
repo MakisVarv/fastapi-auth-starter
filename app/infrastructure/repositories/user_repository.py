@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlalchemy import select
 
 from app.application.errors import UserNotFoundError
