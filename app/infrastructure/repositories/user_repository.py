@@ -1,4 +1,7 @@
-from sqlalchemy import func, select
+from typing import Tuple
+
+from sqlalchemy import Select, func, select
+from sqlalchemy.orm import joinedload
 
 from app.application.common.pagination import Page
 from app.application.common.sorting import SortOptions
@@ -14,6 +17,13 @@ from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
     model_type = UserModel
+
+    def _base_query(self) -> Select[Tuple[UserModel]]:
+        return (
+            super()
+            ._base_query()
+            .options(joinedload(UserModel.role).selectinload(RoleModel.permissions))
+        )
 
     def _to_domain(self, model: UserModel) -> User:
         return User(
@@ -80,7 +90,7 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
         )
 
     def get_by_email(self, email: str) -> User | None:
-        model = self.session.scalar(select(UserModel).where(UserModel.email == email))
+        model = self.session.scalar(self._base_query().where(UserModel.email == email))
         if model is None:
             return None
 
