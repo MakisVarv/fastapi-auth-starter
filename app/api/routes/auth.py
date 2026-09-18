@@ -42,15 +42,7 @@ def register(
         password=payload.password,
         phone=payload.phone,
     )
-
-    return UserResponse(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        email=user.email,
-        phone=user.phone,
-        is_active=user.is_active,
-    )
+    return UserResponse.model_validate(user)
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -75,15 +67,7 @@ def login(
     )
 
     return LoginResponse(
-        access_token=result.access_token,
-        user=UserResponse(
-            id=result.user.id,
-            first_name=result.user.first_name,
-            last_name=result.user.last_name,
-            email=result.user.email,
-            phone=result.user.phone,
-            is_active=result.user.is_active,
-        ),
+        access_token=result.access_token, user=UserResponse.model_validate(result.user)
     )
 
 
@@ -136,14 +120,7 @@ def me(
     response: Response, current_user: User = Depends(get_current_user)
 ) -> UserResponse:
 
-    return UserResponse(
-        id=current_user.id,
-        first_name=current_user.first_name,
-        last_name=current_user.last_name,
-        email=current_user.email,
-        phone=current_user.phone,
-        is_active=current_user.is_active,
-    )
+    return UserResponse.model_validate(current_user)
 
 
 @router.patch("/me", response_model=UserResponse)
@@ -156,11 +133,4 @@ def update_me(
 
     new_user = use_case.execute(user_id=current_user.id, updates=updates)
 
-    return UserResponse(
-        id=new_user.id,
-        first_name=new_user.first_name,
-        last_name=new_user.last_name,
-        email=new_user.email,
-        phone=new_user.phone,
-        is_active=new_user.is_active,
-    )
+    return UserResponse.model_validate(new_user)
