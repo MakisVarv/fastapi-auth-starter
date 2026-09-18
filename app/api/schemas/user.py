@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 from app.api.schemas.common import PaginationParams
+from app.api.schemas.role import RoleResponse
 
 
 class UserResponse(BaseModel):
@@ -13,6 +14,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     phone: str | None = None
     is_active: bool
+    role: RoleResponse
 
 
 class UserListParams(PaginationParams):

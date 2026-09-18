@@ -52,8 +52,3 @@ def get_logout_session() -> LogoutSession:
 def get_update_current_user() -> UpdateCurrentUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return UpdateCurrentUser(uow=uow)
-
-
-def get_require_permission() -> RequirePermission:
-    uow = SqlAlchemyUnitOfWork(SessionFactory)
-    return RequirePermission(uow=uow)
