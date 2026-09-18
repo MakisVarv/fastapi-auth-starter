@@ -28,6 +28,7 @@ class LoginUser:
         self.token_service = token_service
 
     def execute(self, email: str, password: str) -> LoginResult:
+        email = email.strip().lower()
         with self.uow:
             user = self.uow.users.get_by_email(email)
             if user is None:

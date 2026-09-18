@@ -27,6 +27,8 @@ class UserListParams(PaginationParams):
         "-email",
         "is_active",
         "-is_active",
+        "role",
+        "-role",
         "created_at",
         "-created_at",
     ] = "-created_at"

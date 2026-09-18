@@ -94,10 +94,12 @@ def logout(
     use_case: LogoutSession = Depends(get_logout_session),
 ) -> MessageResponse:
 
-    if refresh_token is None:
-        raise InvalidRefreshTokenError()
+    if refresh_token is not None:
+        try:
+            use_case.execute(refresh_token=refresh_token)
+        except InvalidRefreshTokenError:
+            pass
 
-    use_case.execute(refresh_token=refresh_token)
     response.delete_cookie("refresh_token")
 
     return MessageResponse(message="Logged out successfully.")

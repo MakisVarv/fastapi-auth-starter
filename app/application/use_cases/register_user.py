@@ -24,6 +24,7 @@ class RegisterUser:
         password: str,
         phone: str | None = None,
     ) -> User:
+        email = email.strip().lower()
         with self.uow:
             existing_user = self.uow.users.get_by_email(email)
             role = self.uow.roles.get_by_name("User")

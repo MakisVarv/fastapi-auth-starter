@@ -10,6 +10,25 @@ class RegisterRequest(BaseModel):
     phone: str | None = None
     password: str = Field(min_length=8)
 
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_names(cls, value: str) -> str:
+        value = value.strip()
+
+        if not value:
+            raise ValueError("Field cannot be empty.")
+
+        return value
+
+    @field_validator("phone")
+    @classmethod
+    def normalize_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+        return value or None
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -36,6 +55,15 @@ class UpdateMeRequest(BaseModel):
             raise ValueError("At least one field must be provided.")
 
         return self
+
+    @field_validator("phone")
+    @classmethod
+    def normalize_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+        return value or None
 
     @field_validator("first_name", "last_name")
     @classmethod
