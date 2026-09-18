@@ -1,13 +1,14 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 from app.api.schemas.common import PaginationParams
 from app.api.schemas.role import RoleResponse
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     first_name: str
     last_name: str
