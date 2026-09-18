@@ -3,6 +3,8 @@ from sqlalchemy import func, select
 from app.application.common.pagination import Page
 from app.application.common.sorting import SortOptions
 from app.application.errors import UserNotFoundError
+from app.domain.entities.permission import Permission
+from app.domain.entities.role import Role
 from app.domain.entities.user import User
 from app.infrastructure.models import RoleModel
 from app.infrastructure.models.user import UserModel
@@ -20,9 +22,22 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
             last_name=model.last_name,
             email=model.email,
             phone=model.phone,
-            role_id=model.role_id,
             password_hash=model.password_hash,
             is_active=model.is_active,
+            role=Role(
+                id=model.role.id,
+                name=model.role.name,
+                description=model.role.description,
+                level=model.role.level,
+                permissions=[
+                    Permission(
+                        id=permission.id,
+                        name=permission.name,
+                        description=permission.description,
+                    )
+                    for permission in model.role.permissions
+                ],
+            ),
         )
 
     def list_paginated(
@@ -78,7 +93,7 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
             first_name=user.first_name,
             last_name=user.last_name,
             email=user.email,
-            role_id=user.role_id,
+            role_id=user.role.id,
             phone=user.phone,
             password_hash=user.password_hash,
             is_active=user.is_active,
@@ -93,7 +108,7 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
         model.first_name = user.first_name
         model.last_name = user.last_name
         model.email = user.email
-        model.role_id = user.role_id
+        model.role_id = user.role.id
         model.phone = user.phone
         model.password_hash = user.password_hash
         model.is_active = user.is_active

@@ -39,7 +39,7 @@ class RegisterUser:
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
-                role_id=role.id,
+                role=role,
                 phone=phone,
                 password_hash=password_hash,
             )
