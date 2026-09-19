@@ -12,7 +12,7 @@ from app.infrastructure.security.token_service import PyJWTTokenService
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
 
 
-def get_user() -> GetUser:
+def get_user_case() -> GetUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
 
     return GetUser(

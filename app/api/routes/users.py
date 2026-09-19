@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 
 from app.api.dependencies.auth import require_permission
-from app.api.dependencies.use_cases import get_list_users, get_user
+from app.api.dependencies.use_cases import get_list_users, get_user_case
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
 from app.api.schemas.user import UserListParams, UserResponse
@@ -42,6 +42,6 @@ def list_users(
     response_model=UserResponse,
     dependencies=[Depends(require_permission("user.read"))],
 )
-def get_user(user_id: UUID, use_case: GetUser = Depends(get_user)) -> UserResponse:
-    user = get_user(user_id)
+def get_user(user_id: UUID, use_case: GetUser = Depends(get_user_case)) -> UserResponse:
+    user = use_case.execute(user_id)
     return UserResponse.model_validate(user)
