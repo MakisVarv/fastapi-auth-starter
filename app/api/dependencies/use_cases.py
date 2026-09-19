@@ -1,4 +1,5 @@
 from app.application.use_cases.get_current_user import GetCurrentUser
+from app.application.use_cases.get_user import GetUser
 from app.application.use_cases.list_users import ListUsers
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.logout_session import LogoutSession
@@ -9,6 +10,14 @@ from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
 from app.infrastructure.security.token_service import PyJWTTokenService
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
+
+
+def get_user() -> GetUser:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+
+    return GetUser(
+        uow=uow,
+    )
 
 
 def get_register_user() -> RegisterUser:

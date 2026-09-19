@@ -14,12 +14,17 @@ class PaginationParams(BaseModel):
     page_size: int = Field(default=20, ge=1, le=100)
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    items: list[T]
     page: int
     page_size: int
     total: int
     total_pages: int
     has_next: bool
     has_previous: bool
+
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    model_config = ConfigDict(from_attributes=True)
+    items: list[T]
+    pagination: PaginationResponse

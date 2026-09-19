@@ -1,12 +1,14 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
 from app.api.dependencies.auth import require_permission
-from app.api.dependencies.use_cases import get_list_users
+from app.api.dependencies.use_cases import get_list_users, get_user
 from app.api.query.sorting import parse_sort
-from app.api.schemas.common import PaginatedResponse
+from app.api.schemas.common import PaginatedResponse, PaginationResponse
 from app.api.schemas.user import UserListParams, UserResponse
+from app.application.use_cases.get_user import GetUser
 from app.application.use_cases.list_users import ListUsers
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -30,4 +32,16 @@ def list_users(
         role=payload.role,
         search=payload.search,
     )
-    return PaginatedResponse[UserResponse].model_validate(users)
+    items = [UserResponse.model_validate(user) for user in users.items]
+    pagination = PaginationResponse.model_validate(payload)
+    return PaginatedResponse[UserResponse](items=items, pagination=pagination)
+
+
+@router.get(
+    "/{user_id}",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission("user.read"))],
+)
+def get_user(user_id: UUID, use_case: GetUser = Depends(get_user)) -> UserResponse:
+    user = get_user(user_id)
+    return UserResponse.model_validate(user)
