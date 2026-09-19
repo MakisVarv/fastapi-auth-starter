@@ -40,7 +40,7 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
                 UserModel.role.has(RoleModel.name.ilike(role.strip()))
             )
         if is_active is not None:
-            statement = statement.where(User.is_active == is_active)
+            statement = statement.where(UserModel.is_active == is_active)
         return statement
 
     def _base_query(self) -> Select[Tuple[UserModel]]:

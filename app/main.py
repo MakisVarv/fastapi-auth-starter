@@ -5,6 +5,7 @@ from app.api.error_handlers import (
     register_exception_handlers,
 )
 from app.api.routes.auth import router as auth_router
+from app.api.routes.users import router as user_router
 
 app = FastAPI()
 register_exception_handlers(app)
@@ -21,3 +22,4 @@ allow_origins = [
     "http://127.0.0.1:5173",
 ]
 app.include_router(auth_router, prefix="/api")
+app.include_router(user_router, prefix="/api")
