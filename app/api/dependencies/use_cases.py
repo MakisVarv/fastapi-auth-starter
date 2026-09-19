@@ -1,4 +1,5 @@
 from app.application.use_cases.get_current_user import GetCurrentUser
+from app.application.use_cases.list_users import ListUsers
 from app.application.use_cases.login_user import LoginUser
 from app.application.use_cases.logout_session import LogoutSession
 from app.application.use_cases.refresh_session import RefreshSession
@@ -51,3 +52,8 @@ def get_logout_session() -> LogoutSession:
 def get_update_current_user() -> UpdateCurrentUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return UpdateCurrentUser(uow=uow)
+
+
+def get_list_users() -> ListUsers:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return ListUsers(uow=uow)
