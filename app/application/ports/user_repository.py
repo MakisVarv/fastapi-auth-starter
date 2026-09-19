@@ -14,6 +14,9 @@ class UserRepository(Protocol):
         page: int,
         page_size: int,
         sort_options: SortOptions,
+        search: str | None,
+        role: str | None,
+        is_active: bool | None,
     ) -> Page[User]: ...
 
     def get_by_id(self, user_id: uuid.UUID, /) -> User | None: ...

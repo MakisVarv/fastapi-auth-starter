@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import joinedload
 
 from app.application.common.pagination import Page
@@ -17,6 +17,31 @@ from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
     model_type = UserModel
+
+    def _apply_filters(
+        self,
+        statement,
+        search: str | None = None,
+        role: str | None = None,
+        is_active: bool | None = None,
+    ):
+        if search:
+            pattern = f"%{search.strip()}%"
+
+            statement = statement.where(
+                or_(
+                    UserModel.first_name.ilike(pattern),
+                    UserModel.last_name.ilike(pattern),
+                    UserModel.email.ilike(pattern),
+                )
+            )
+        if role:
+            statement = statement.where(
+                UserModel.role.has(RoleModel.name.ilike(role.strip()))
+            )
+        if is_active is not None:
+            statement = statement.where(User.is_active == is_active)
+        return statement
 
     def _base_query(self) -> Select[Tuple[UserModel]]:
         return (
@@ -56,9 +81,24 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
         page: int,
         page_size: int,
         sort_options: SortOptions,
+        search: str | None,
+        role: str | None,
+        is_active: bool | None,
     ) -> Page[User]:
         statement = self._base_query()
+        statement = self._apply_filters(
+            statement,
+            search=search,
+            role=role,
+            is_active=is_active,
+        )
         count_statement = select(func.count()).select_from(UserModel)
+        count_statement = self._apply_filters(
+            count_statement,
+            search=search,
+            role=role,
+            is_active=is_active,
+        )
         sort_columns = {
             "id": UserModel.id,
             "first_name": UserModel.first_name,

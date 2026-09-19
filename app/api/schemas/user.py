@@ -35,3 +35,6 @@ class UserListParams(PaginationParams):
         "created_at",
         "-created_at",
     ] = "-created_at"
+    search: str | None = None
+    role: str | None = None
+    is_active: bool | None = None
