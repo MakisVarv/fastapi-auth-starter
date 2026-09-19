@@ -2,12 +2,12 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.errors import InvalidAccessTokenError, PermissionDeniedError
-from app.application.use_cases.get_current_user import GetCurrentUser
-from app.application.use_cases.login_user import LoginUser
-from app.application.use_cases.logout_session import LogoutSession
-from app.application.use_cases.refresh_session import RefreshSession
-from app.application.use_cases.register_user import RegisterUser
-from app.application.use_cases.update_current_user import UpdateCurrentUser
+from app.application.use_cases.auth.get_current_user import GetCurrentUser
+from app.application.use_cases.auth.login_user import LoginUser
+from app.application.use_cases.auth.logout_session import LogoutSession
+from app.application.use_cases.auth.refresh_session import RefreshSession
+from app.application.use_cases.auth.register_user import RegisterUser
+from app.application.use_cases.auth.update_current_user import UpdateCurrentUser
 from app.domain.entities.user import User
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher

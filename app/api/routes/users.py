@@ -10,8 +10,8 @@ from app.api.dependencies.users import get_list_users, get_user_case
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
 from app.api.schemas.user import UserListParams, UserResponse
-from app.application.use_cases.get_user import GetUser
-from app.application.use_cases.list_users import ListUsers
+from app.application.use_cases.users.get_user import GetUser
+from app.application.use_cases.users.list_users import ListUsers
 
 router = APIRouter(prefix="/users", tags=["users"])
 

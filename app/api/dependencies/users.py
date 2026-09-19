@@ -1,5 +1,5 @@
-from app.application.use_cases.get_user import GetUser
-from app.application.use_cases.list_users import ListUsers
+from app.application.use_cases.users.get_user import GetUser
+from app.application.use_cases.users.list_users import ListUsers
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
 
