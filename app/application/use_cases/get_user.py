@@ -17,5 +17,5 @@ class GetUser:
         with self.uow:
             user = self.uow.users.get_by_id(user_id)
             if user is None:
-                raise UserNotFoundError
+                raise UserNotFoundError()
             return user
