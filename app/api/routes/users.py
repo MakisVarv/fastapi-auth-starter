@@ -33,7 +33,7 @@ def list_users(
         search=payload.search,
     )
     items = [UserResponse.model_validate(user) for user in users.items]
-    pagination = PaginationResponse.model_validate(payload)
+    pagination = PaginationResponse.model_validate(users)
     return PaginatedResponse[UserResponse](items=items, pagination=pagination)
 
 
