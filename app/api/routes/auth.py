@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Cookie, Depends, Response
 
-from app.api.dependencies.auth import get_current_user
-from app.api.dependencies.use_cases import (
+from app.api.dependencies.auth import (
+    get_current_user,
     get_login_user,
     get_logout_session,
     get_refresh_session,

@@ -3,8 +3,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 
-from app.api.dependencies.auth import require_permission
-from app.api.dependencies.use_cases import get_list_users, get_user_case
+from app.api.dependencies.auth import (
+    require_permission,
+)
+from app.api.dependencies.users import get_list_users, get_user_case
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
 from app.api.schemas.user import UserListParams, UserResponse
