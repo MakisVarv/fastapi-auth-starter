@@ -32,9 +32,9 @@ class CreateUser:
             existing_user = self.uow.users.get_by_email(email)
             role = self.uow.roles.get_by_id(role_id)
             if role is None:
-                raise RoleNotFoundError
+                raise RoleNotFoundError()
             if existing_user is not None:
-                raise EmailAlreadyRegisteredError
+                raise EmailAlreadyRegisteredError()
 
             password_hash = self.password_hasher.hash(password)
 

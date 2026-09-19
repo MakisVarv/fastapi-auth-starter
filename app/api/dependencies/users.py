@@ -4,7 +4,7 @@ from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
 
 
-def get_user_case() -> GetUser:
+def get_user_use_case() -> GetUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
 
     return GetUser(
