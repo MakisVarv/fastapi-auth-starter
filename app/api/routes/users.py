@@ -13,7 +13,7 @@ from app.api.dependencies.users import (
 )
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
-from app.api.schemas.user import UserListParams, UserRequest, UserResponse
+from app.api.schemas.user import CreateUserRequest, UserListParams, UserResponse
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
@@ -56,9 +56,13 @@ def get_user(
     return UserResponse.model_validate(user)
 
 
-@router.post("", response_model=UserResponse)
-def register(
-    payload: UserRequest, use_case: CreateUser = Depends(get_create_user)
+@router.post(
+    "",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission("user.create"))],
+)
+def create_user(
+    payload: CreateUserRequest, use_case: CreateUser = Depends(get_create_user)
 ) -> UserResponse:
 
     user = use_case.execute(

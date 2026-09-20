@@ -18,8 +18,7 @@ class UserResponse(BaseModel):
     role: RoleResponse
 
 
-class UserRequest(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class CreateUserRequest(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
