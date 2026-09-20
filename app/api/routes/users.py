@@ -8,13 +8,20 @@ from app.api.dependencies.auth import (
     require_permission,
 )
 from app.api.dependencies.users import (
+    UpdateUser,
     get_create_user,
     get_list_users,
+    get_update_user,
     get_user_use_case,
 )
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
-from app.api.schemas.user import CreateUserRequest, UserListParams, UserResponse
+from app.api.schemas.user import (
+    CreateUserRequest,
+    UpdateUserRequest,
+    UserListParams,
+    UserResponse,
+)
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
@@ -79,4 +86,20 @@ def create_user(
         phone=payload.phone,
         role_id=payload.role_id,
     )
+    return UserResponse.model_validate(user)
+
+
+@router.patch(
+    "/{user_id}",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission("user.update"))],
+)
+def update_user(
+    payload: UpdateUserRequest,
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: UpdateUser = Depends(get_update_user),
+) -> UserResponse:
+    updates = payload.model_dump(exclude_unset=True)
+    user = use_case.execute(actor=current_user, user_id=user_id, updates=updates)
     return UserResponse.model_validate(user)
