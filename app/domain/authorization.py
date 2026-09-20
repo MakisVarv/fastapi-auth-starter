@@ -1,5 +1,3 @@
-from enum import Enum
-
 from app.domain.entities.role import Role
 from app.domain.entities.user import User
 
