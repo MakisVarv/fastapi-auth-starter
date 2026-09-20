@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.api.schemas.common import PaginationParams
 from app.api.schemas.role import RoleResponse
@@ -16,6 +16,16 @@ class UserResponse(BaseModel):
     phone: str | None = None
     is_active: bool
     role: RoleResponse
+
+
+class UserRequest(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    first_name: str
+    last_name: str
+    email: EmailStr
+    phone: str | None = None
+    password: str = Field(min_length=8)
+    role_id: UUID
 
 
 class UserListParams(PaginationParams):

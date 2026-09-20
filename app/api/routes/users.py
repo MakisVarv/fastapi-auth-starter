@@ -6,10 +6,15 @@ from fastapi import APIRouter, Depends, Query
 from app.api.dependencies.auth import (
     require_permission,
 )
-from app.api.dependencies.users import get_list_users, get_user_use_case
+from app.api.dependencies.users import (
+    get_create_user,
+    get_list_users,
+    get_user_use_case,
+)
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
-from app.api.schemas.user import UserListParams, UserResponse
+from app.api.schemas.user import UserListParams, UserRequest, UserResponse
+from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
 
@@ -48,4 +53,20 @@ def get_user(
     user_id: UUID, use_case: GetUser = Depends(get_user_use_case)
 ) -> UserResponse:
     user = use_case.execute(user_id)
+    return UserResponse.model_validate(user)
+
+
+@router.post("", response_model=UserResponse)
+def register(
+    payload: UserRequest, use_case: CreateUser = Depends(get_create_user)
+) -> UserResponse:
+
+    user = use_case.execute(
+        first_name=payload.first_name,
+        last_name=payload.last_name,
+        email=str(payload.email),
+        password=payload.password,
+        phone=payload.phone,
+        role_id=payload.role_id,
+    )
     return UserResponse.model_validate(user)
