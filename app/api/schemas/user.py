@@ -61,7 +61,7 @@ class UpdateUserRequest(BaseModel):
 
     @field_validator("first_name", "last_name")
     @classmethod
-    def validate_names(cls, value: str) -> str:
+    def validate_names(cls, value: str | None) -> str:
         if value is None:
             raise ValueError("Field cannot be null.")
 
@@ -74,7 +74,7 @@ class UpdateUserRequest(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_email(cls, value: EmailStr) -> EmailStr:
+    def validate_email(cls, value: EmailStr | None) -> EmailStr:
         if value is None:
             raise ValueError("Field cannot be null.")
         return value
