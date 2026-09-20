@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 
 from app.api.dependencies.auth import (
+    get_current_user,
     require_permission,
 )
 from app.api.dependencies.users import (
@@ -17,6 +18,7 @@ from app.api.schemas.user import CreateUserRequest, UserListParams, UserResponse
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
+from app.domain.entities.user import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -58,14 +60,18 @@ def get_user(
 
 @router.post(
     "",
+    status_code=201,
     response_model=UserResponse,
     dependencies=[Depends(require_permission("user.create"))],
 )
 def create_user(
-    payload: CreateUserRequest, use_case: CreateUser = Depends(get_create_user)
+    payload: CreateUserRequest,
+    current_user: User = Depends(get_current_user),
+    use_case: CreateUser = Depends(get_create_user),
 ) -> UserResponse:
 
     user = use_case.execute(
+        actor=current_user,
         first_name=payload.first_name,
         last_name=payload.last_name,
         email=str(payload.email),

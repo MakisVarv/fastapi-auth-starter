@@ -6,6 +6,11 @@ from app.application.errors import (
 )
 from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.unit_of_work import UnitOfWork
+from app.domain.authorization import (
+    AuthorizationError,
+    AuthorizationReason,
+    ensure_can_assign_role,
+)
 from app.domain.entities.user import User
 
 
@@ -20,6 +25,7 @@ class CreateUser:
 
     def execute(
         self,
+        actor: User,
         first_name: str,
         last_name: str,
         email: str,
@@ -31,8 +37,11 @@ class CreateUser:
         with self.uow:
             existing_user = self.uow.users.get_by_email(email)
             role = self.uow.roles.get_by_id(role_id)
+
             if role is None:
                 raise RoleNotFoundError()
+            if not ensure_can_assign_role(actor=actor, role=role):
+                raise AuthorizationError(AuthorizationReason.CANNOT_ASSIGN_ROLE)
             if existing_user is not None:
                 raise EmailAlreadyRegisteredError()
 
