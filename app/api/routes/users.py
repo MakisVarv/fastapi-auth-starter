@@ -8,7 +8,6 @@ from app.api.dependencies.auth import (
     require_permission,
 )
 from app.api.dependencies.users import (
-    UpdateUser,
     get_create_user,
     get_list_users,
     get_update_user,
@@ -25,6 +24,7 @@ from app.api.schemas.user import (
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
+from app.application.use_cases.users.update_user import UpdateUser
 from app.domain.entities.user import User
 
 router = APIRouter(prefix="/users", tags=["users"])
