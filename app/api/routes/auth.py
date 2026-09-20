@@ -123,7 +123,7 @@ def me(
     return UserResponse.model_validate(current_user)
 
 
-@router.patch("/me", response_model=UserResponse)
+@router.patch("/me", status_code=201, response_model=UserResponse)
 def update_me(
     payload: UpdateMeRequest,
     current_user: User = Depends(get_current_user),

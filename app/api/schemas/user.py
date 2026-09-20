@@ -1,7 +1,7 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.api.schemas.common import PaginationParams
 from app.api.schemas.role import RoleResponse
@@ -25,6 +25,25 @@ class CreateUserRequest(BaseModel):
     phone: str | None = None
     password: str = Field(min_length=8)
     role_id: UUID
+
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_names(cls, value: str) -> str:
+        value = value.strip()
+
+        if not value:
+            raise ValueError("Field cannot be empty.")
+
+        return value
+
+    @field_validator("phone")
+    @classmethod
+    def normalize_phone(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+
+        value = value.strip()
+        return value or None
 
 
 class UserListParams(PaginationParams):
