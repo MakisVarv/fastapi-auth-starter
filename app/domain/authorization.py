@@ -7,18 +7,7 @@ MAX_ROLE_LEVEL = 100
 PROTECTED_ROLE_NAMES = {"Admin", "User"}
 
 
-class AuthorizationReason(str, Enum):
-    CANNOT_ASSIGN_ROLE = "cannot_assign_role"
-    CANNOT_MANAGE_USER = "cannot_manage_user"
-
-
-class AuthorizationError(Exception):
-    def __init__(self, reason: AuthorizationReason) -> None:
-        self.reason = reason
-        super().__init__(reason.value)
-
-
-def ensure_can_manage_user(actor: User, target: User) -> bool:
+def can_manage_user(actor: User, target: User) -> bool:
     if actor.role.level == MAX_ROLE_LEVEL:
         return True
     if actor.role.level <= target.role.level:
@@ -26,7 +15,7 @@ def ensure_can_manage_user(actor: User, target: User) -> bool:
     return True
 
 
-def ensure_can_assign_role(actor: User, role: Role) -> bool:
+def can_assign_role(actor: User, role: Role) -> bool:
     if actor.role.level == MAX_ROLE_LEVEL:
         return True
 

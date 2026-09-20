@@ -1,15 +1,15 @@
 from uuid import UUID
 
 from app.application.errors import (
+    AuthorizationError,
+    AuthorizationReason,
     EmailAlreadyRegisteredError,
     RoleNotFoundError,
 )
 from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.unit_of_work import UnitOfWork
 from app.domain.authorization import (
-    AuthorizationError,
-    AuthorizationReason,
-    ensure_can_assign_role,
+    can_assign_role,
 )
 from app.domain.entities.user import User
 
@@ -40,7 +40,7 @@ class CreateUser:
 
             if role is None:
                 raise RoleNotFoundError()
-            if not ensure_can_assign_role(actor=actor, role=role):
+            if not can_assign_role(actor=actor, role=role):
                 raise AuthorizationError(AuthorizationReason.CANNOT_ASSIGN_ROLE)
             if existing_user is not None:
                 raise EmailAlreadyRegisteredError()

@@ -3,6 +3,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.application.errors import (
+    AuthorizationError,
+    AuthorizationReason,
     EmailAlreadyRegisteredError,
     InactiveUserError,
     InvalidAccessTokenError,
@@ -51,6 +53,26 @@ ERROR_RESPONSES = {
         "Permission denied.",
     ),
 }
+
+AUTHORIZATION_MESSAGES = {
+    AuthorizationReason.CANNOT_ASSIGN_ROLE: "You are not authorized to assign this role.",
+    AuthorizationReason.CANNOT_MANAGE_USER: "You are not authorized to manage this user.",
+}
+
+
+def authorization_error_handler(
+    request: Request,
+    exc: Exception,
+) -> JSONResponse:
+    if not isinstance(exc, AuthorizationError):
+        raise exc
+
+    message = AUTHORIZATION_MESSAGES[exc.reason]
+
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"message": message},
+    )
 
 
 def application_error_handler(
@@ -101,4 +123,8 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         RequestValidationError,
         request_validation_error_handler,
+    )
+    app.add_exception_handler(
+        AuthorizationError,
+        authorization_error_handler,
     )
