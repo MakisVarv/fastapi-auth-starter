@@ -8,6 +8,7 @@ from app.api.dependencies.auth import (
     require_permission,
 )
 from app.api.dependencies.users import (
+    get_change_role,
     get_change_status,
     get_create_user,
     get_list_users,
@@ -136,7 +137,7 @@ def change_user_role(
     payload: ChangeRoleRequest,
     user_id: UUID,
     current_user: User = Depends(get_current_user),
-    use_case: ChangeUserRole = Depends(get_change_status),
+    use_case: ChangeUserRole = Depends(get_change_role),
 ) -> UserResponse:
     user = use_case.execute(
         actor=current_user, user_id=user_id, role_id=payload.role_id
