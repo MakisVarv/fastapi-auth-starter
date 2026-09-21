@@ -1,6 +1,7 @@
 from app.application.use_cases.users.change_user_role import ChangeUserRole
 from app.application.use_cases.users.change_user_status import ChangeUserStatus
 from app.application.use_cases.users.create_user import CreateUser
+from app.application.use_cases.users.delete_user import DeleteUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
 from app.application.use_cases.users.update_user import UpdateUser
@@ -52,5 +53,13 @@ def get_change_role() -> ChangeUserRole:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
 
     return ChangeUserRole(
+        uow=uow,
+    )
+
+
+def get_delete_user() -> DeleteUser:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+
+    return DeleteUser(
         uow=uow,
     )

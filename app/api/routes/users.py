@@ -1,16 +1,18 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import (
     get_current_user,
     require_permission,
 )
 from app.api.dependencies.users import (
+    DeleteUser,
     get_change_role,
     get_change_status,
     get_create_user,
+    get_delete_user,
     get_list_users,
     get_update_user,
     get_user_use_case,
@@ -143,3 +145,16 @@ def change_user_role(
         actor=current_user, user_id=user_id, role_id=payload.role_id
     )
     return UserResponse.model_validate(user)
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission("user.delete"))],
+)
+def delete_user(
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: DeleteUser = Depends(get_delete_user),
+) -> None:
+    use_case.execute(actor=current_user, user_id=user_id)

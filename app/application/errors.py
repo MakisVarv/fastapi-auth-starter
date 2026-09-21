@@ -13,6 +13,10 @@ class InactiveUserError(Exception):
     pass
 
 
+class ActiveUserDeletionError(Exception):
+    pass
+
+
 class InvalidAccessTokenError(Exception):
     pass
 

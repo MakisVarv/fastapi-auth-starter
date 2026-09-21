@@ -6,10 +6,11 @@ from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from app.application.common.pagination import Page
+from app.domain.entities.base_entity import BaseEntity
 from app.infrastructure.database.base import BaseModel
 from app.infrastructure.query.pagination import Pagination
 
-DomainT = TypeVar("DomainT")
+DomainT = TypeVar("DomainT", bound=BaseEntity)
 ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
@@ -50,6 +51,12 @@ class SqlAlchemyRepository(Generic[DomainT, ModelT], ABC):
 
     def _base_query(self) -> Select[Tuple[ModelT]]:
         return select(self.model_type)
+
+    def delete(self, entity: DomainT) -> None:
+        model = self.session.get(self.model_type, entity.id)
+
+        if model is not None:
+            self.session.delete(model)
 
     @abstractmethod
     def _to_domain(self, model: ModelT) -> DomainT: ...
