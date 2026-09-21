@@ -20,7 +20,9 @@ from app.api.schemas.user import (
     UpdateUserRequest,
     UserListParams,
     UserResponse,
+    UserStatusRequest,
 )
+from app.application.use_cases.users.change_user_status import ChangeUserStatus
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
@@ -102,4 +104,21 @@ def update_user(
 ) -> UserResponse:
     updates = payload.model_dump(exclude_unset=True)
     user = use_case.execute(actor=current_user, user_id=user_id, updates=updates)
+    return UserResponse.model_validate(user)
+
+
+@router.patch(
+    "/{user_id}/status",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission("user.update"))],
+)
+def change_user_status(
+    payload: UserStatusRequest,
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: ChangeUserStatus = Depends(get_update_user),
+) -> UserResponse:
+    user = use_case.execute(
+        actor=current_user, user_id=user_id, is_active=payload.is_active
+    )
     return UserResponse.model_validate(user)

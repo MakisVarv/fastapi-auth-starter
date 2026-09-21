@@ -53,6 +53,10 @@ class CreateUserRequest(BaseModel):
         return value or None
 
 
+class UserStatusRequest(BaseModel):
+    is_active: bool
+
+
 class UpdateUserRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
