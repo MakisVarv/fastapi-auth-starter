@@ -1,13 +1,14 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import UUID
+
+from app.domain.entities.base_entity import BaseEntity
 
 
 @dataclass
-class AuthSession:
+class AuthSession(BaseEntity):
     user_id: UUID
     current_refresh_jti: str
     expires_at: datetime
 
-    id: UUID = field(default_factory=uuid4)
     revoked_at: datetime | None = None

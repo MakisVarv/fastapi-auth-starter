@@ -1,16 +1,15 @@
-from dataclasses import dataclass, field
-from uuid import UUID, uuid4
+from dataclasses import dataclass
 
+from app.domain.entities.base_entity import BaseEntity
 from app.domain.entities.role import Role
 
 
 @dataclass
-class User:
+class User(BaseEntity):
     first_name: str
     last_name: str
     email: str
     password_hash: str
     role: Role
     phone: str | None = None
-    id: UUID = field(default_factory=uuid4)
     is_active: bool = True
