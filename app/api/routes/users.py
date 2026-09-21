@@ -8,7 +8,6 @@ from app.api.dependencies.auth import (
     require_permission,
 )
 from app.api.dependencies.users import (
-    DeleteUser,
     get_change_role,
     get_change_status,
     get_create_user,
@@ -30,6 +29,7 @@ from app.api.schemas.user import (
 from app.application.use_cases.users.change_user_role import ChangeUserRole
 from app.application.use_cases.users.change_user_status import ChangeUserStatus
 from app.application.use_cases.users.create_user import CreateUser
+from app.application.use_cases.users.delete_user import DeleteUser
 from app.application.use_cases.users.get_user import GetUser
 from app.application.use_cases.users.list_users import ListUsers
 from app.application.use_cases.users.update_user import UpdateUser

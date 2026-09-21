@@ -3,6 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.application.errors import (
+    ActiveUserDeletionError,
     AuthorizationError,
     AuthorizationReason,
     EmailAlreadyRegisteredError,
@@ -22,6 +23,10 @@ ERROR_RESPONSES = {
     RegistrationRoleNotFoundError: (
         status.HTTP_500_INTERNAL_SERVER_ERROR,
         "Default registration role is not configured.",
+    ),
+    ActiveUserDeletionError: (
+        status.HTTP_409_CONFLICT,
+        "Active users must be deactivated before they can be deleted.",
     ),
     RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
     EmailAlreadyRegisteredError: (
