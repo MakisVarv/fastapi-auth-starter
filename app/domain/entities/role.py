@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from uuid import UUID, uuid4
 
 from app.domain.entities.base_entity import BaseEntity
 from app.domain.entities.permission import Permission
