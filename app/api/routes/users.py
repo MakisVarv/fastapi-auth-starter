@@ -17,12 +17,14 @@ from app.api.dependencies.users import (
 from app.api.query.sorting import parse_sort
 from app.api.schemas.common import PaginatedResponse, PaginationResponse
 from app.api.schemas.user import (
+    ChangeRoleRequest,
     CreateUserRequest,
     UpdateUserRequest,
     UserListParams,
     UserResponse,
     UserStatusRequest,
 )
+from app.application.use_cases.users.change_user_role import ChangeUserRole
 from app.application.use_cases.users.change_user_status import ChangeUserStatus
 from app.application.use_cases.users.create_user import CreateUser
 from app.application.use_cases.users.get_user import GetUser
@@ -121,5 +123,22 @@ def change_user_status(
 ) -> UserResponse:
     user = use_case.execute(
         actor=current_user, user_id=user_id, is_active=payload.is_active
+    )
+    return UserResponse.model_validate(user)
+
+
+@router.patch(
+    "/{user_id}/role",
+    response_model=UserResponse,
+    dependencies=[Depends(require_permission("user.change_role"))],
+)
+def change_user_role(
+    payload: ChangeRoleRequest,
+    user_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: ChangeUserRole = Depends(get_change_status),
+) -> UserResponse:
+    user = use_case.execute(
+        actor=current_user, user_id=user_id, role_id=payload.role_id
     )
     return UserResponse.model_validate(user)

@@ -57,6 +57,10 @@ class UserStatusRequest(BaseModel):
     is_active: bool
 
 
+class ChangeRoleRequest(BaseModel):
+    role_id: UUID
+
+
 class UpdateUserRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
