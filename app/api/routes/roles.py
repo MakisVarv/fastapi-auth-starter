@@ -4,12 +4,12 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_user, require_permission
 from app.api.dependencies.roles import (
-    CreateRole,
     get_create_role,
     get_list_roles,
     get_role_use_case,
 )
 from app.api.schemas.role import CreateRoleRequest, RoleResponse
+from app.application.use_cases.roles.create_role import CreateRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
 from app.domain.entities.user import User
