@@ -47,3 +47,11 @@ class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
             return None
 
         return self._to_domain(model=model)
+
+    def add(self, role: Role) -> None:
+
+        model = RoleModel(
+            id=role.id, name=role.name, description=role.description, level=role.level
+        )
+
+        self.session.add(model)

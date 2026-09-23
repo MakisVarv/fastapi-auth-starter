@@ -3,8 +3,13 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import require_permission
-from app.api.dependencies.roles import get_list_roles, get_role_use_case
-from app.api.schemas.role import RoleResponse
+from app.api.dependencies.roles import (
+    CreateRole,
+    get_create_role,
+    get_list_roles,
+    get_role_use_case,
+)
+from app.api.schemas.role import CreateRoleRequest, RoleResponse
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
 
@@ -33,4 +38,19 @@ def get_role(
     role_id: UUID, use_case: GetRole = Depends(get_role_use_case)
 ) -> RoleResponse:
     role = use_case.execute(role_id)
+    return RoleResponse.model_validate(role)
+
+
+@router.post(
+    "",
+    status_code=201,
+    response_model=RoleResponse,
+    dependencies=[Depends(require_permission("role.create"))],
+)
+def create_role(
+    payload: CreateRoleRequest, use_case: CreateRole = Depends(get_create_role)
+):
+    role = use_case.execute(
+        name=payload.name, description=payload.description, level=payload.level
+    )
     return RoleResponse.model_validate(role)

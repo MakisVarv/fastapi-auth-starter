@@ -45,6 +45,10 @@ class RoleNotFoundError(Exception):
     pass
 
 
+class RoleAlreadyExist(Exception):
+    pass
+
+
 class PermissionDeniedError(Exception):
     pass
 

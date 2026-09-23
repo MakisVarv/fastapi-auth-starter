@@ -12,3 +12,11 @@ class RoleResponse(BaseModel):
     description: str | None = None
     level: int
     permissions: list[PermissionResponse]
+
+    name: str
+
+
+class CreateRoleRequest(BaseModel):
+    name: str
+    description: str | None = None
+    level: int
