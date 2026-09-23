@@ -17,9 +17,9 @@ class CreateRole:
         self, actor: User, name: str, description: str | None, level: int
     ) -> Role:
         with self.uow:
-            existing = self.uow.roles.get_by_name(name=name)
             if not can_set_role_level(actor, level):
                 raise AuthorizationError(AuthorizationReason.CANNOT_SET_ROLE_LEVEL)
+            existing = self.uow.roles.get_by_name(name=name)
             if existing is not None:
                 raise RoleAlreadyExist()
             role = Role(name=name, description=description, level=level)
