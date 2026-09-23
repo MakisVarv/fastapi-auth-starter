@@ -5,7 +5,7 @@ from app.api.dependencies.roles import get_list_roles
 from app.api.schemas.role import RoleResponse
 from app.application.use_cases.roles.list_roles import ListRoles
 
-router = APIRouter(prefix="/roles", tags=["users"])
+router = APIRouter(prefix="/roles", tags=["roles"])
 
 
 @router.get(
