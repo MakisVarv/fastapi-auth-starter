@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Tuple
 
 from sqlalchemy import Select
@@ -30,6 +31,12 @@ class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
                 for permission_model in model.permissions
             ],
         )
+
+    def list_all(self) -> Sequence[Role]:
+        statement = self._base_query()
+        roles = self.session.scalars(statement).all()
+
+        return [self._to_domain(role) for role in roles]
 
     def get_by_name(self, name: str) -> Role | None:
 

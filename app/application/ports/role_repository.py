@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
 
@@ -6,6 +7,7 @@ from app.domain.entities.role import Role
 
 class RoleRepository(Protocol):
 
+    def list_all(self) -> Sequence[Role]: ...
     def get_by_id(self, role_id: UUID, /) -> Role | None: ...
 
     def get_by_name(self, name: str) -> Role | None: ...
