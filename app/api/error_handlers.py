@@ -67,6 +67,7 @@ ERROR_RESPONSES = {
 AUTHORIZATION_MESSAGES = {
     AuthorizationReason.CANNOT_ASSIGN_ROLE: "You are not authorized to assign this role.",
     AuthorizationReason.CANNOT_MANAGE_USER: "You are not authorized to manage this user.",
+    AuthorizationReason.CANNOT_SET_ROLE_LEVEL: "You are not authorized to set this level.",
 }
 
 

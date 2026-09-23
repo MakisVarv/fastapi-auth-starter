@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies.auth import require_permission
+from app.api.dependencies.auth import get_current_user, require_permission
 from app.api.dependencies.roles import (
     CreateRole,
     get_create_role,
@@ -12,6 +12,7 @@ from app.api.dependencies.roles import (
 from app.api.schemas.role import CreateRoleRequest, RoleResponse
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
+from app.domain.entities.user import User
 
 router = APIRouter(prefix="/roles", tags=["roles"])
 
@@ -48,9 +49,14 @@ def get_role(
     dependencies=[Depends(require_permission("role.create"))],
 )
 def create_role(
-    payload: CreateRoleRequest, use_case: CreateRole = Depends(get_create_role)
-):
+    payload: CreateRoleRequest,
+    current_user: User = Depends(get_current_user),
+    use_case: CreateRole = Depends(get_create_role),
+) -> RoleResponse:
     role = use_case.execute(
-        name=payload.name, description=payload.description, level=payload.level
+        actor=current_user,
+        name=payload.name,
+        description=payload.description,
+        level=payload.level,
     )
     return RoleResponse.model_validate(role)

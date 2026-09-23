@@ -20,3 +20,12 @@ def can_assign_role(actor: User, role: Role) -> bool:
     if actor.role.level <= role.level:
         return False
     return True
+
+
+def can_set_role_level(actor: User, level: int) -> bool:
+    if actor.role.level == MAX_ROLE_LEVEL:
+        return True
+
+    if actor.role.level <= level:
+        return False
+    return True
