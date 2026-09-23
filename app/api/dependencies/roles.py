@@ -9,6 +9,6 @@ def get_list_roles() -> ListRoles:
     return ListRoles(uow=uow)
 
 
-def get_role() -> GetRole:
+def get_role_use_case() -> GetRole:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return GetRole(uow=uow)
