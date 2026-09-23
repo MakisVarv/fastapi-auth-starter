@@ -1,9 +1,10 @@
 from collections.abc import Sequence
 from typing import Tuple
 
-from sqlalchemy import Select
+from sqlalchemy import Select, select
 from sqlalchemy.orm import selectinload
 
+from app.application.errors import RoleNotFoundError
 from app.domain.entities.permission import Permission
 from app.domain.entities.role import Role
 from app.infrastructure.models import RoleModel
@@ -55,3 +56,11 @@ class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
         )
 
         self.session.add(model)
+
+    def update(self, role: Role) -> None:
+        model = self.session.scalar(select(RoleModel).where(RoleModel.id == role.id))
+        if model is None:
+            raise RoleNotFoundError()
+        model.name = role.name
+        model.description = role.description
+        model.level = role.level

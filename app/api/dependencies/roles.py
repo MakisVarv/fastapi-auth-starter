@@ -1,6 +1,7 @@
 from app.application.use_cases.roles.create_role import CreateRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
+from app.application.use_cases.roles.update_role import UpdateRole
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
 
@@ -18,3 +19,8 @@ def get_role_use_case() -> GetRole:
 def get_create_role() -> CreateRole:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return CreateRole(uow=uow)
+
+
+def get_update_role() -> UpdateRole:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return UpdateRole(uow=uow)

@@ -12,6 +12,7 @@ from app.application.errors import (
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     PermissionDeniedError,
+    ProtectedRoleModificationError,
     RefreshTokenReplayError,
     RegistrationRoleNotFoundError,
     RoleAlreadyExist,
@@ -33,6 +34,10 @@ ERROR_RESPONSES = {
     RoleAlreadyExist: (
         status.HTTP_409_CONFLICT,
         "Role already exists.",
+    ),
+    ProtectedRoleModificationError: (
+        status.HTTP_409_CONFLICT,
+        "Built-in role name and level cannot be changed.",
     ),
     EmailAlreadyRegisteredError: (
         status.HTTP_409_CONFLICT,
@@ -67,6 +72,7 @@ ERROR_RESPONSES = {
 AUTHORIZATION_MESSAGES = {
     AuthorizationReason.CANNOT_ASSIGN_ROLE: "You are not authorized to assign this role.",
     AuthorizationReason.CANNOT_MANAGE_USER: "You are not authorized to manage this user.",
+    AuthorizationReason.CANNOT_MANAGE_ROLE: "You are not authorized to manage this role.",
     AuthorizationReason.CANNOT_SET_ROLE_LEVEL: "You are not authorized to set this level.",
 }
 

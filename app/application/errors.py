@@ -53,9 +53,14 @@ class PermissionDeniedError(Exception):
     pass
 
 
+class ProtectedRoleModificationError(Exception):
+    pass
+
+
 class AuthorizationReason(str, Enum):
     CANNOT_ASSIGN_ROLE = "cannot_assign_role"
     CANNOT_MANAGE_USER = "cannot_manage_user"
+    CANNOT_MANAGE_ROLE = "cannot_manage_role"
     CANNOT_SET_ROLE_LEVEL = "cannot_set_role_level"
 
 

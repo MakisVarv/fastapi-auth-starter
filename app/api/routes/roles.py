@@ -1,17 +1,21 @@
+from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_user, require_permission
 from app.api.dependencies.roles import (
+    UpdateRole,
     get_create_role,
     get_list_roles,
     get_role_use_case,
+    get_update_role,
 )
-from app.api.schemas.role import CreateRoleRequest, RoleResponse
+from app.api.schemas.role import CreateRoleRequest, RoleResponse, UpdateRoleRequest
 from app.application.use_cases.roles.create_role import CreateRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
+from app.application.use_cases.roles.update_role import RoleUpdates
 from app.domain.entities.user import User
 
 router = APIRouter(prefix="/roles", tags=["roles"])
@@ -59,4 +63,23 @@ def create_role(
         description=payload.description,
         level=payload.level,
     )
+    return RoleResponse.model_validate(role)
+
+
+@router.patch(
+    "/{role_id}",
+    response_model=RoleResponse,
+    dependencies=[Depends(require_permission("role.update"))],
+)
+def update_role(
+    role_id: UUID,
+    payload: UpdateRoleRequest,
+    current_user: User = Depends(get_current_user),
+    use_case: UpdateRole = Depends(get_update_role),
+) -> RoleResponse:
+    updates = cast(
+        RoleUpdates,
+        payload.model_dump(exclude_unset=True),
+    )
+    role = use_case.execute(role_id=role_id, actor=current_user, updates=updates)
     return RoleResponse.model_validate(role)
