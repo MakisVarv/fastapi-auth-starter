@@ -6,12 +6,14 @@ from app.application.errors import (
     ActiveUserDeletionError,
     AuthorizationError,
     AuthorizationReason,
+    DeleteRoleWithUsersError,
     EmailAlreadyRegisteredError,
     InactiveUserError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     PermissionDeniedError,
+    ProtectedRoleDeletionError,
     ProtectedRoleModificationError,
     RefreshTokenReplayError,
     RegistrationRoleNotFoundError,
@@ -35,9 +37,17 @@ ERROR_RESPONSES = {
         status.HTTP_409_CONFLICT,
         "Role already exists.",
     ),
+    DeleteRoleWithUsersError: (
+        status.HTTP_409_CONFLICT,
+        "Role cannot be deleted while users are assigned to it.",
+    ),
     ProtectedRoleModificationError: (
         status.HTTP_409_CONFLICT,
         "Built-in role name and level cannot be changed.",
+    ),
+    ProtectedRoleDeletionError: (
+        status.HTTP_409_CONFLICT,
+        "Built-in role name and level cannot be deleted.",
     ),
     EmailAlreadyRegisteredError: (
         status.HTTP_409_CONFLICT,

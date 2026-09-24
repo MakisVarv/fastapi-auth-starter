@@ -1,4 +1,5 @@
 from app.application.use_cases.roles.create_role import CreateRole
+from app.application.use_cases.roles.delete_role import DeleteRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
 from app.application.use_cases.roles.update_role import UpdateRole
@@ -24,3 +25,11 @@ def get_create_role() -> CreateRole:
 def get_update_role() -> UpdateRole:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return UpdateRole(uow=uow)
+
+
+def get_delete_role() -> DeleteRole:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+
+    return DeleteRole(
+        uow=uow,
+    )

@@ -1,4 +1,5 @@
 from typing import Tuple
+from uuid import UUID
 
 from sqlalchemy import Select, func, or_, select
 from sqlalchemy.orm import joinedload
@@ -162,3 +163,11 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
         model.phone = user.phone
         model.password_hash = user.password_hash
         model.is_active = user.is_active
+
+    def count_by_role(self, role_id: UUID) -> int:
+        return (
+            self.session.scalar(
+                select(func.count(UserModel.id)).where(UserModel.role_id == role_id)
+            )
+            or 0
+        )

@@ -57,6 +57,14 @@ class ProtectedRoleModificationError(Exception):
     pass
 
 
+class ProtectedRoleDeletionError(Exception):
+    pass
+
+
+class DeleteRoleWithUsersError(Exception):
+    pass
+
+
 class AuthorizationReason(str, Enum):
     CANNOT_ASSIGN_ROLE = "cannot_assign_role"
     CANNOT_MANAGE_USER = "cannot_manage_user"
