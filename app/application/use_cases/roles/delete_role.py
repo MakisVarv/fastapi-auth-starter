@@ -20,7 +20,7 @@ class DeleteRole:
         with self.uow:
             role = self.uow.roles.get_by_id(role_id)
             if role is None:
-                raise RoleNotFoundError
+                raise RoleNotFoundError()
             if not can_manage_role(actor=actor, role=role):
                 raise AuthorizationError(AuthorizationReason.CANNOT_MANAGE_ROLE)
             if role.name in PROTECTED_ROLE_NAMES:
