@@ -31,6 +31,6 @@ class AssignPermission:
             if permission in role.permissions:
                 raise PermissionAlreadyInRoleError()
             role.permissions.append(permission)
-            self.uow.roles.update(role)
+            self.uow.roles.assign_permission(role=role, permission=permission)
             self.uow.commit()
             return role

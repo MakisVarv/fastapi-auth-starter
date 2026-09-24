@@ -30,5 +30,5 @@ class RemovePermission:
             if permission not in role.permissions:
                 raise PermissionNotInRoleError()
             role.permissions.remove(permission)
-            self.uow.roles.update(role)
+            self.uow.roles.remove_permission(role=role, permission=permission)
             self.uow.commit()

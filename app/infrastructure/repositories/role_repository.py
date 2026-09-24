@@ -4,10 +4,10 @@ from typing import Tuple
 from sqlalchemy import Select, select
 from sqlalchemy.orm import selectinload
 
-from app.application.errors import RoleNotFoundError
+from app.application.errors import PermissionNotFoundError, RoleNotFoundError
 from app.domain.entities.permission import Permission
 from app.domain.entities.role import Role
-from app.infrastructure.models import RoleModel
+from app.infrastructure.models import PermissionModel, RoleModel
 from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 
@@ -64,3 +64,27 @@ class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
         model.name = role.name
         model.description = role.description
         model.level = role.level
+
+    def assign_permission(self, role: Role, permission: Permission) -> None:
+        role_model = self.session.get(RoleModel, role.id)
+        permission_model = self.session.get(PermissionModel, permission.id)
+
+        if role_model is None:
+            raise RoleNotFoundError()
+
+        if permission_model is None:
+            raise PermissionNotFoundError()
+
+        role_model.permissions.append(permission_model)
+
+    def remove_permission(self, role: Role, permission: Permission) -> None:
+        role_model = self.session.get(RoleModel, role.id)
+        permission_model = self.session.get(PermissionModel, permission.id)
+
+        if role_model is None:
+            raise RoleNotFoundError()
+
+        if permission_model is None:
+            raise PermissionNotFoundError()
+
+        role_model.permissions.remove(permission_model)

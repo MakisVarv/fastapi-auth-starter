@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Protocol
 from uuid import UUID
 
+from app.domain.entities.permission import Permission
 from app.domain.entities.role import Role
 
 
@@ -15,3 +16,5 @@ class RoleRepository(Protocol):
     def update(self, role: Role) -> None: ...
 
     def delete(self, entity: Role) -> None: ...
+    def assign_permission(self, role: Role, permission: Permission) -> None: ...
+    def remove_permission(self, role: Role, permission: Permission) -> None: ...

@@ -9,6 +9,7 @@ from app.api.dependencies.roles import (
     get_create_role,
     get_delete_role,
     get_list_roles,
+    get_remove_permission,
     get_role_use_case,
     get_update_role,
 )
@@ -134,6 +135,6 @@ def remove_permission(
     permission_id: UUID,
     role_id: UUID,
     current_user: User = Depends(get_current_user),
-    use_case: RemovePermission = Depends(get_assign_permission),
+    use_case: RemovePermission = Depends(get_remove_permission),
 ) -> None:
     use_case.execute(actor=current_user, role_id=role_id, permission_id=permission_id)
