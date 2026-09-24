@@ -28,7 +28,7 @@ class AssignPermission:
             permission = self.uow.permissions.get_by_id(permission_id)
             if permission is None:
                 raise PermissionNotFoundError()
-            if permission in role.permissions:
+            if any(existing.id == permission.id for existing in role.permissions):
                 raise PermissionAlreadyInRoleError()
             role.permissions.append(permission)
             self.uow.roles.assign_permission(role=role, permission=permission)

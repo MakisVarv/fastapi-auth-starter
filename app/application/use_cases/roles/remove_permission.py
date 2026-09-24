@@ -27,8 +27,13 @@ class RemovePermission:
             permission = self.uow.permissions.get_by_id(permission_id)
             if permission is None:
                 raise PermissionNotFoundError()
-            if permission not in role.permissions:
+            assigned_permission = None
+            for existing in role.permissions:
+                if existing.id == permission.id:
+                    assigned_permission = existing
+                    break
+            if assigned_permission is None:
                 raise PermissionNotInRoleError()
-            role.permissions.remove(permission)
+            role.permissions.remove(assigned_permission)
             self.uow.roles.remove_permission(role=role, permission=permission)
             self.uow.commit()
