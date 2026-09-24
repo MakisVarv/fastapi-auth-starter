@@ -53,6 +53,10 @@ class PermissionDeniedError(Exception):
     pass
 
 
+class PermissionNotFoundError(Exception):
+    pass
+
+
 class ProtectedRoleModificationError(Exception):
     pass
 

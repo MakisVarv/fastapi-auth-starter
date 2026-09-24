@@ -13,6 +13,7 @@ from app.application.errors import (
     InvalidCredentialsError,
     InvalidRefreshTokenError,
     PermissionDeniedError,
+    PermissionNotFoundError,
     ProtectedRoleDeletionError,
     ProtectedRoleModificationError,
     RefreshTokenReplayError,
@@ -33,6 +34,7 @@ ERROR_RESPONSES = {
         "Active users must be deactivated before they can be deleted.",
     ),
     RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
+    PermissionNotFoundError: (status.HTTP_404_NOT_FOUND, "Permission not found!"),
     RoleAlreadyExist: (
         status.HTTP_409_CONFLICT,
         "Role already exists.",
