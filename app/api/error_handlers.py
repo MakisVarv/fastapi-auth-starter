@@ -12,8 +12,10 @@ from app.application.errors import (
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
+    PermissionAlreadyInRoleError,
     PermissionDeniedError,
     PermissionNotFoundError,
+    PermissionNotInRoleError,
     ProtectedRoleDeletionError,
     ProtectedRoleModificationError,
     RefreshTokenReplayError,
@@ -38,6 +40,14 @@ ERROR_RESPONSES = {
     RoleAlreadyExist: (
         status.HTTP_409_CONFLICT,
         "Role already exists.",
+    ),
+    PermissionAlreadyInRoleError: (
+        status.HTTP_409_CONFLICT,
+        "Permission already assigned to role.",
+    ),
+    PermissionNotInRoleError: (
+        status.HTTP_409_CONFLICT,
+        "Permission not assigned to role.",
     ),
     DeleteRoleWithUsersError: (
         status.HTTP_409_CONFLICT,

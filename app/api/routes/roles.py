@@ -5,17 +5,25 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.auth import get_current_user, require_permission
 from app.api.dependencies.roles import (
+    get_assign_permission,
     get_create_role,
     get_delete_role,
     get_list_roles,
     get_role_use_case,
     get_update_role,
 )
-from app.api.schemas.role import CreateRoleRequest, RoleResponse, UpdateRoleRequest
+from app.api.schemas.role import (
+    AddPermissionRequest,
+    CreateRoleRequest,
+    RoleResponse,
+    UpdateRoleRequest,
+)
+from app.application.use_cases.roles.assign_permission import AssignPermission
 from app.application.use_cases.roles.create_role import CreateRole
 from app.application.use_cases.roles.delete_role import DeleteRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
+from app.application.use_cases.roles.remove_permission import RemovePermission
 from app.application.use_cases.roles.update_role import RoleUpdates, UpdateRole
 from app.domain.entities.user import User
 
@@ -97,3 +105,35 @@ def delete_role(
     use_case: DeleteRole = Depends(get_delete_role),
 ) -> None:
     use_case.execute(actor=current_user, role_id=role_id)
+
+
+@router.post(
+    "/{role_id}/permissions",
+    status_code=201,
+    response_model=RoleResponse,
+    dependencies=[Depends(require_permission("role.assign_permission"))],
+)
+def assign_permission(
+    payload: AddPermissionRequest,
+    role_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: AssignPermission = Depends(get_assign_permission),
+) -> RoleResponse:
+    role = use_case.execute(
+        actor=current_user, role_id=role_id, permission_id=payload.permission_id
+    )
+    return RoleResponse.model_validate(role)
+
+
+@router.delete(
+    "/{role_id}/permissions/{permission_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission("role.assign_permission"))],
+)
+def remove_permission(
+    permission_id: UUID,
+    role_id: UUID,
+    current_user: User = Depends(get_current_user),
+    use_case: RemovePermission = Depends(get_assign_permission),
+) -> None:
+    use_case.execute(actor=current_user, role_id=role_id, permission_id=permission_id)

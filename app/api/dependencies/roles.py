@@ -1,7 +1,9 @@
+from app.application.use_cases.roles.assign_permission import AssignPermission
 from app.application.use_cases.roles.create_role import CreateRole
 from app.application.use_cases.roles.delete_role import DeleteRole
 from app.application.use_cases.roles.get_role import GetRole
 from app.application.use_cases.roles.list_roles import ListRoles
+from app.application.use_cases.roles.remove_permission import RemovePermission
 from app.application.use_cases.roles.update_role import UpdateRole
 from app.infrastructure.database.session import SessionFactory
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
@@ -33,3 +35,13 @@ def get_delete_role() -> DeleteRole:
     return DeleteRole(
         uow=uow,
     )
+
+
+def get_assign_permission() -> AssignPermission:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return AssignPermission(uow=uow)
+
+
+def get_remove_permission() -> RemovePermission:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return RemovePermission(uow=uow)

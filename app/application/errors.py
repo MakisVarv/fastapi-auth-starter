@@ -57,6 +57,14 @@ class PermissionNotFoundError(Exception):
     pass
 
 
+class PermissionAlreadyInRoleError(Exception):
+    pass
+
+
+class PermissionNotInRoleError(Exception):
+    pass
+
+
 class ProtectedRoleModificationError(Exception):
     pass
 

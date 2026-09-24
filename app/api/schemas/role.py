@@ -31,6 +31,11 @@ class CreateRoleRequest(BaseModel):
         return value
 
 
+class AddPermissionRequest(BaseModel):
+
+    permission_id: UUID
+
+
 class UpdateRoleRequest(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=50)
     description: str | None = Field(default=None, max_length=255)
