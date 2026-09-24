@@ -1,6 +1,7 @@
 from typing import Protocol, Self
 
 from app.application.ports.auth_session_repository import AuthSessionRepository
+from app.application.ports.permission_repository import PermissionRepository
 from app.application.ports.role_repository import RoleRepository
 from app.application.ports.user_repository import UserRepository
 
@@ -9,6 +10,7 @@ class UnitOfWork(Protocol):
     users: UserRepository
     auth_sessions: AuthSessionRepository
     roles: RoleRepository
+    permissions: PermissionRepository
 
     def __enter__(self) -> Self: ...
 
