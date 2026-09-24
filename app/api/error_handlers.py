@@ -47,7 +47,7 @@ ERROR_RESPONSES = {
     ),
     ProtectedRoleDeletionError: (
         status.HTTP_409_CONFLICT,
-        "Built-in role name and level cannot be deleted.",
+        "Built-in roles cannot be deleted.",
     ),
     EmailAlreadyRegisteredError: (
         status.HTTP_409_CONFLICT,

@@ -91,7 +91,7 @@ def update_role(
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(require_permission("role.delete"))],
 )
-def delete_user(
+def delete_role(
     role_id: UUID,
     current_user: User = Depends(get_current_user),
     use_case: DeleteRole = Depends(get_delete_role),

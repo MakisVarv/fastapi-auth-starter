@@ -23,9 +23,9 @@ class DeleteRole:
                 raise RoleNotFoundError
             if not can_manage_role(actor=actor, role=role):
                 raise AuthorizationError(AuthorizationReason.CANNOT_MANAGE_ROLE)
-            role_users = self.uow.users.count_by_role(role_id)
             if role.name in PROTECTED_ROLE_NAMES:
                 raise ProtectedRoleDeletionError()
+            role_users = self.uow.users.count_by_role(role_id)
             if role_users > 0:
                 raise DeleteRoleWithUsersError()
             self.uow.roles.delete(entity=role)
