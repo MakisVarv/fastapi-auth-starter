@@ -1,9 +1,20 @@
 from uuid import uuid4
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import PermissionModel, RoleModel
+
+
+class SeedSettings(BaseSettings):
+    ADMIN_EMAIL: str | None = None
+    ADMIN_PASSWORD: str | None = None
+    ADMIN_FIRST_NAME: str = "System"
+    ADMIN_LAST_NAME: str = "Admin"
+
+    model_config = SettingsConfigDict(env_file=".env")
+
 
 PERMISSIONS: list[dict[str, str]] = [
     # Users

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRES_DAYS: int = 7
     COOKIE_SECURE: bool = True
 
+    FRONTEND_ORIGIN: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
