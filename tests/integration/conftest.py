@@ -1,6 +1,8 @@
+from collections.abc import Generator
+
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 import app.infrastructure.models  # noqa: F401
 from app.infrastructure.database.base import Base
@@ -17,10 +19,29 @@ TestSessionFactory = sessionmaker(
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_database():
+def setup_database() -> None:
     Base.metadata.create_all(test_engine)
 
     with TestSessionFactory() as session:
         seed_permissions(session)
         seed_roles(session)
         seed_role_permissions(session)
+
+
+@pytest.fixture
+def db_session() -> Generator[Session, None, None]:
+    connection = test_engine.connect()
+    transaction = connection.begin()
+
+    session = Session(
+        bind=connection,
+        join_transaction_mode="create_savepoint",
+        expire_on_commit=False,
+    )
+
+    try:
+        yield session
+    finally:
+        session.close()
+        transaction.rollback()
+        connection.close()
