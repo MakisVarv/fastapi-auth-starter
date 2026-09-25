@@ -19,6 +19,7 @@ pytest = "*"
 pytest-cov = "*"
 ruff = "*"
 black = "*"
+httpx2 = "*"
 
 [requires]
 python_version = "3.14"

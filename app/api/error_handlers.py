@@ -148,7 +148,7 @@ def request_validation_error_handler(request: Request, exc: Exception) -> JSONRe
             }
         )
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"errors": errors},
     )
 
