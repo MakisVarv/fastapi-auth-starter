@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from pydantic import EmailStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -10,7 +11,7 @@ from app.infrastructure.security.password_hasher import Argon2PasswordHasher
 
 
 class SeedSettings(BaseSettings):
-    ADMIN_EMAIL: str | None = None
+    ADMIN_EMAIL: EmailStr | None = None
     ADMIN_PASSWORD: str | None = None
     ADMIN_FIRST_NAME: str = "System"
     ADMIN_LAST_NAME: str = "Admin"
@@ -150,7 +151,7 @@ def seed_admin(session: Session) -> None:
     if not seed_settings.ADMIN_EMAIL or not seed_settings.ADMIN_PASSWORD:
         raise RuntimeError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured.")
 
-    email = seed_settings.ADMIN_EMAIL.strip().lower()
+    email = str(seed_settings.ADMIN_EMAIL).strip().lower()
     password = seed_settings.ADMIN_PASSWORD
     first_name = seed_settings.ADMIN_FIRST_NAME
     last_name = seed_settings.ADMIN_LAST_NAME
