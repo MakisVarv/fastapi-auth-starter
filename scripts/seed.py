@@ -156,7 +156,7 @@ def seed_admin(session: Session) -> None:
     last_name = seed_settings.ADMIN_LAST_NAME
 
     if not email:
-        raise RuntimeError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured.")
+        raise RuntimeError("ADMIN_EMAIL must not be empty.")
 
     if len(password) < 8:
         raise RuntimeError("ADMIN_PASSWORD must be at least 8 characters.")
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     from app.infrastructure.database.session import SessionFactory
 
     with SessionFactory() as session:
-        seed_admin(session)
         seed_permissions(session)
         seed_roles(session)
         seed_role_permissions(session)
+        seed_admin(session)
