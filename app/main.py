@@ -8,14 +8,14 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.permissions import router as permission_router
 from app.api.routes.roles import router as role_router
 from app.api.routes.users import router as user_router
-from app.infrastructure.config import Settings
+from app.infrastructure.config import settings
 
 app = FastAPI()
 register_exception_handlers(app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[Settings.FRONTEND_ORIGIN],
+    allow_origins=[settings.FRONTEND_ORIGIN],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
