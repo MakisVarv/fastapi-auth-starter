@@ -6,6 +6,7 @@ from app.infrastructure.repositories.base import SqlAlchemyRepository
 
 
 class SqlAlchemyPermissionRepository(SqlAlchemyRepository[Permission, PermissionModel]):
+    model_type = PermissionModel
 
     def _to_domain(self, model: PermissionModel) -> Permission:
         return Permission(id=model.id, name=model.name, description=model.description)
