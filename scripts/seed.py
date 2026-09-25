@@ -13,7 +13,10 @@ class SeedSettings(BaseSettings):
     ADMIN_FIRST_NAME: str = "System"
     ADMIN_LAST_NAME: str = "Admin"
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
 
 
 PERMISSIONS: list[dict[str, str]] = [
