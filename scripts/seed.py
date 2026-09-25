@@ -5,6 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.infrastructure.models import PermissionModel, RoleModel
+from app.infrastructure.models.user import UserModel
+from app.infrastructure.security.password_hasher import Argon2PasswordHasher
 
 
 class SeedSettings(BaseSettings):
@@ -141,11 +143,60 @@ def seed_role_permissions(session: Session) -> None:
     print("Role-permission commit completed.")
 
 
+def seed_admin(session: Session) -> None:
+    print("Starting admin seed...")
+    seed_settings = SeedSettings()
+
+    if not seed_settings.ADMIN_EMAIL or not seed_settings.ADMIN_PASSWORD:
+        raise RuntimeError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured.")
+
+    email = seed_settings.ADMIN_EMAIL.strip().lower()
+    password = seed_settings.ADMIN_PASSWORD
+    first_name = seed_settings.ADMIN_FIRST_NAME
+    last_name = seed_settings.ADMIN_LAST_NAME
+
+    if not email:
+        raise RuntimeError("ADMIN_EMAIL and ADMIN_PASSWORD must be configured.")
+
+    if len(password) < 8:
+        raise RuntimeError("ADMIN_PASSWORD must be at least 8 characters.")
+    existing = session.scalar(select(UserModel).where(UserModel.email == email))
+
+    admin_role = session.scalar(select(RoleModel).where(RoleModel.name == "Admin"))
+    if admin_role is None:
+        raise RuntimeError("Admin role does not exist.")
+
+    if existing:
+        if existing.role_id != admin_role.id:
+            existing.role_id = admin_role.id
+            session.commit()
+            print("Existing user promoted to Admin.")
+        else:
+            print("Admin user already exists.")
+
+        return
+
+    password_hasher = Argon2PasswordHasher()
+    password_hash = password_hasher.hash(password)
+    admin = UserModel(
+        id=uuid4(),
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password_hash=password_hash,
+        role_id=admin_role.id,
+    )
+    session.add(admin)
+    session.commit()
+    print("Admin user created.")
+
+
 if __name__ == "__main__":
 
     from app.infrastructure.database.session import SessionFactory
 
     with SessionFactory() as session:
+        seed_admin(session)
         seed_permissions(session)
         seed_roles(session)
         seed_role_permissions(session)
