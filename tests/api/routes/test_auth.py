@@ -510,16 +510,98 @@ def test_logout_without_cookie_is_successful(
 
     assert response.status_code == 200
     assert response.json() == {"message": "Logged out successfully."}
-
     assert fake.called is False
 
-    set_cookie = response.headers["set-cookie"].lower()
-
-    assert "refresh_token=" in set_cookie
-    assert "max-age=0" in set_cookie
+    assert response.cookies.get("refresh_token") is None
+    assert response.cookies.get("csrf_refresh_token") is None
 
 
-def test_logout_with_invalid_cookie_is_still_successful(
+def test_logout_requires_csrf_when_refresh_cookie_exists(
+    client: TestClient,
+) -> None:
+    fake = FakeLogoutSession()
+
+    app.dependency_overrides[get_logout_session] = lambda: fake
+
+    client.cookies.set(
+        "refresh_token",
+        "refresh-token",
+        path="/api/auth",
+    )
+
+    response = client.post("/api/auth/logout")
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid refresh token."}
+    assert fake.called is False
+
+
+def test_logout_rejects_csrf_bound_to_different_refresh_token(
+    client: TestClient,
+) -> None:
+    fake = FakeLogoutSession()
+
+    app.dependency_overrides[get_logout_session] = lambda: fake
+
+    client.cookies.set(
+        "refresh_token",
+        "refresh-token",
+        path="/api/auth",
+    )
+
+    csrf_token = generate_csrf_token("different-refresh-token")
+
+    response = client.post(
+        "/api/auth/logout",
+        headers={
+            "X-CSRF-TOKEN": csrf_token,
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid refresh token."}
+    assert fake.called is False
+
+
+def test_logout_with_valid_csrf_revokes_session_and_clears_cookies(
+    client: TestClient,
+) -> None:
+    fake = FakeLogoutSession()
+
+    app.dependency_overrides[get_logout_session] = lambda: fake
+
+    refresh_token = "refresh-token"
+    csrf_token = generate_csrf_token(refresh_token)
+
+    client.cookies.set(
+        "refresh_token",
+        refresh_token,
+        path="/api/auth",
+    )
+    client.cookies.set(
+        "csrf_refresh_token",
+        csrf_token,
+        path="/",
+    )
+
+    response = client.post(
+        "/api/auth/logout",
+        headers={
+            "X-CSRF-TOKEN": csrf_token,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"message": "Logged out successfully."}
+
+    assert fake.called is True
+    assert fake.received_token == refresh_token
+
+    assert response.cookies.get("refresh_token") is None
+    assert response.cookies.get("csrf_refresh_token") is None
+
+
+def test_logout_with_invalid_refresh_token_is_still_successful_after_valid_csrf(
     client: TestClient,
 ) -> None:
     fake = FakeLogoutSession(
@@ -528,20 +610,35 @@ def test_logout_with_invalid_cookie_is_still_successful(
 
     app.dependency_overrides[get_logout_session] = lambda: fake
 
+    refresh_token = "invalid-refresh-token"
+    csrf_token = generate_csrf_token(refresh_token)
+
     client.cookies.set(
         "refresh_token",
-        "invalid-refresh-token",
+        refresh_token,
+        path="/api/auth",
+    )
+    client.cookies.set(
+        "csrf_refresh_token",
+        csrf_token,
+        path="/",
     )
 
-    response = client.post("/api/auth/logout")
+    response = client.post(
+        "/api/auth/logout",
+        headers={
+            "X-CSRF-TOKEN": csrf_token,
+        },
+    )
 
     assert response.status_code == 200
     assert response.json() == {"message": "Logged out successfully."}
 
     assert fake.called is True
-    assert fake.received_token == "invalid-refresh-token"
+    assert fake.received_token == refresh_token
 
-    assert "max-age=0" in response.headers["set-cookie"].lower()
+    assert response.cookies.get("refresh_token") is None
+    assert response.cookies.get("csrf_refresh_token") is None
 
 
 def test_me_uses_bearer_token_and_returns_current_user(
