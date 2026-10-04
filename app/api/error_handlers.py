@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -8,6 +10,7 @@ from app.application.errors import (
     AuthorizationReason,
     DeleteRoleWithUsersError,
     EmailAlreadyRegisteredError,
+    ExpiredAccessTokenError,
     InactiveUserError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
@@ -25,69 +28,84 @@ from app.application.errors import (
     UserNotFoundError,
 )
 
+
+@dataclass(frozen=True)
+class ErrorResponse:
+    status_code: int
+    message: str
+    code: str | None = None
+
+
 ERROR_RESPONSES = {
-    UserNotFoundError: (status.HTTP_404_NOT_FOUND, "User not found!"),
-    RegistrationRoleNotFoundError: (
+    UserNotFoundError: ErrorResponse(status.HTTP_404_NOT_FOUND, "User not found!"),
+    RegistrationRoleNotFoundError: ErrorResponse(
         status.HTTP_500_INTERNAL_SERVER_ERROR,
         "Default registration role is not configured.",
     ),
-    ActiveUserDeletionError: (
+    ActiveUserDeletionError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Active users must be deactivated before they can be deleted.",
     ),
-    RoleNotFoundError: (status.HTTP_404_NOT_FOUND, "Role not found!"),
-    PermissionNotFoundError: (status.HTTP_404_NOT_FOUND, "Permission not found!"),
-    RoleAlreadyExist: (
+    RoleNotFoundError: ErrorResponse(status.HTTP_404_NOT_FOUND, "Role not found!"),
+    PermissionNotFoundError: ErrorResponse(
+        status.HTTP_404_NOT_FOUND, "Permission not found!"
+    ),
+    RoleAlreadyExist: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Role already exists.",
     ),
-    PermissionAlreadyInRoleError: (
+    PermissionAlreadyInRoleError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Permission already assigned to role.",
     ),
-    PermissionNotInRoleError: (
+    PermissionNotInRoleError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Permission not assigned to role.",
     ),
-    DeleteRoleWithUsersError: (
+    DeleteRoleWithUsersError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Role cannot be deleted while users are assigned to it.",
     ),
-    ProtectedRoleModificationError: (
+    ProtectedRoleModificationError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Built-in role name and level cannot be changed.",
     ),
-    ProtectedRoleDeletionError: (
+    ProtectedRoleDeletionError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Built-in roles cannot be deleted.",
     ),
-    EmailAlreadyRegisteredError: (
+    EmailAlreadyRegisteredError: ErrorResponse(
         status.HTTP_409_CONFLICT,
         "Email is already registered.",
     ),
-    InvalidCredentialsError: (
+    InvalidCredentialsError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,
         "Invalid credentials.",
     ),
-    InactiveUserError: (
+    InactiveUserError: ErrorResponse(
         status.HTTP_403_FORBIDDEN,
         "Account is inactive.",
     ),
-    InvalidRefreshTokenError: (
+    InvalidRefreshTokenError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,
         "Invalid refresh token.",
     ),
-    InvalidAccessTokenError: (
+    InvalidAccessTokenError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,
         "Invalid access token.",
     ),
-    RefreshTokenReplayError: (
+    RefreshTokenReplayError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,
         "Invalid refresh token.",
     ),
-    PermissionDeniedError: (
+    PermissionDeniedError: ErrorResponse(
         status.HTTP_403_FORBIDDEN,
         "Permission denied.",
+    ),
+    ExpiredAccessTokenError: ErrorResponse(
+        status.HTTP_401_UNAUTHORIZED,
+        "Access token has expired.",
+        "access_token_expired",
     ),
 }
 
@@ -118,11 +136,16 @@ def application_error_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
-    status_code, message = ERROR_RESPONSES[type(exc)]
+    response = ERROR_RESPONSES[type(exc)]
+
+    content = {"message": response.message}
+
+    if response.code is not None:
+        content["code"] = response.code
 
     return JSONResponse(
-        status_code=status_code,
-        content={"message": message},
+        status_code=response.status_code,
+        content=content,
     )
 
 

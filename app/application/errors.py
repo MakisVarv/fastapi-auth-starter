@@ -21,6 +21,10 @@ class InvalidAccessTokenError(Exception):
     pass
 
 
+class ExpiredAccessTokenError(Exception):
+    pass
+
+
 class InvalidRefreshTokenError(Exception):
     pass
 

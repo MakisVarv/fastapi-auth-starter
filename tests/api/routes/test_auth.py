@@ -12,6 +12,7 @@ from app.api.dependencies.auth import (
 )
 from app.application.errors import (
     EmailAlreadyRegisteredError,
+    ExpiredAccessTokenError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
@@ -620,3 +621,28 @@ def test_update_me_rejects_null_name(
         "field": "first_name",
         "message": "Field cannot be null.",
     } in response.json()["errors"]
+
+
+def test_me_maps_expired_access_token_to_unauthorized(
+    client: TestClient,
+) -> None:
+    fake = FakeGetCurrentUser(
+        error=ExpiredAccessTokenError(),
+    )
+
+    app.dependency_overrides[get_current_user_use_case] = lambda: fake
+
+    response = client.get(
+        "/api/auth/me",
+        headers={
+            "Authorization": "Bearer expired-token",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "message": "Access token has expired.",
+        "code": "access_token_expired",
+    }
+
+    assert fake.received_token == "expired-token"

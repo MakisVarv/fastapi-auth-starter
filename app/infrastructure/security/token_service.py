@@ -3,7 +3,11 @@ from uuid import UUID, uuid4
 
 import jwt
 
-from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
+from app.application.errors import (
+    ExpiredAccessTokenError,
+    InvalidAccessTokenError,
+    InvalidRefreshTokenError,
+)
 from app.application.ports.token_service import (
     AccessTokenClaims,
     IssuedRefreshToken,
@@ -82,6 +86,8 @@ class PyJWTTokenService:
                 settings.JWT_SECRET_KEY,
                 algorithms=[settings.JWT_ALGORITHM],
             )
+        except jwt.ExpiredSignatureError as exc:
+            raise ExpiredAccessTokenError() from exc
         except jwt.InvalidTokenError as exc:
             raise InvalidAccessTokenError() from exc
         if payload.get("type") != "access":
