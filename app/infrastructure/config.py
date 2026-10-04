@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRES_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRES_DAYS: int = 7
     COOKIE_SECURE: bool = True
+    CSRF_SECRET_KEY: str
 
     FRONTEND_ORIGIN: str
 
