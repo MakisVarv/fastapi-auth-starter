@@ -327,6 +327,16 @@ def test_login_returns_access_token_user_and_refresh_cookie(
     }
 
     set_cookie = response.headers["set-cookie"]
+    refresh_token = response.cookies.get("refresh_token")
+    csrf_token = response.cookies.get("csrf_refresh_token")
+
+    assert refresh_token == "refresh-token"
+    assert csrf_token is not None
+
+    assert verify_csrf_token(
+        refresh_token=refresh_token,
+        csrf_token=csrf_token,
+    )
 
     assert "refresh_token=refresh-token" in set_cookie
     assert "HttpOnly" in set_cookie
