@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Cookie, Depends, Response
+from fastapi import APIRouter, Cookie, Depends, Header, Response
 
 from app.api.dependencies.auth import (
     get_current_user,
@@ -17,6 +17,7 @@ from app.api.schemas.auth import (
 )
 from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
+from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.application.errors import InvalidRefreshTokenError
 from app.application.use_cases.auth.login_user import LoginUser
 from app.application.use_cases.auth.logout_session import LogoutSession
@@ -56,7 +57,7 @@ def login(
         email=str(payload.email),
         password=payload.password,
     )
-
+    csrf_token = generate_csrf_token(result.refresh_token)
     response.set_cookie(
         key="refresh_token",
         value=result.refresh_token,
@@ -64,8 +65,17 @@ def login(
         secure=settings.COOKIE_SECURE,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+        path="/api/auth",
     )
-
+    response.set_cookie(
+        key="csrf_refresh_token",
+        value=csrf_token,
+        httponly=False,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+        path="/",
+    )
     return LoginResponse(
         access_token=result.access_token, user=UserResponse.model_validate(result.user)
     )
@@ -93,10 +103,20 @@ def logout(
 def refresh(
     response: Response,
     refresh_token: str | None = Cookie(default=None),
+    csrf_token: str | None = Header(
+        default=None,
+        alias="X-CSRF-TOKEN",
+    ),
     use_case: RefreshSession = Depends(get_refresh_session),
 ) -> AccessTokenResponse:
-
     if refresh_token is None:
+        raise InvalidRefreshTokenError()
+
+    if (
+        refresh_token is None
+        or csrf_token is None
+        or not verify_csrf_token(refresh_token, csrf_token)
+    ):
         raise InvalidRefreshTokenError()
 
     result = use_case.execute(refresh_token=refresh_token)
