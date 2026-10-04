@@ -451,8 +451,8 @@ def test_refresh_returns_access_token_and_rotates_refresh_and_csrf_cookies(
 
     assert fake.received_token == old_refresh_token
 
-    new_refresh_token = client.cookies.get("refresh_token")
-    new_csrf_token = client.cookies.get("csrf_refresh_token")
+    new_refresh_token = response.cookies.get("refresh_token")
+    new_csrf_token = response.cookies.get("csrf_refresh_token")
 
     assert new_refresh_token == "new-refresh-token"
     assert new_csrf_token is not None
@@ -496,41 +496,6 @@ def test_refresh_maps_replay_to_unauthorized(
     assert response.status_code == 401
     assert response.json() == {"message": "Invalid refresh token."}
     assert fake.received_token == refresh_token
-
-
-def test_refresh_returns_access_token_and_rotates_cookie(
-    client: TestClient,
-) -> None:
-    fake = FakeRefreshSession(
-        result=RefreshResult(
-            access_token="new-access-token",
-            refresh_token="new-refresh-token",
-        )
-    )
-
-    app.dependency_overrides[get_refresh_session] = lambda: fake
-
-    client.cookies.set(
-        "refresh_token",
-        "old-refresh-token",
-    )
-
-    response = client.post("/api/auth/refresh")
-
-    assert response.status_code == 200
-
-    assert response.json() == {
-        "access_token": "new-access-token",
-        "token_type": "bearer",
-    }
-
-    assert fake.received_token == "old-refresh-token"
-
-    set_cookie = response.headers["set-cookie"]
-
-    assert "refresh_token=new-refresh-token" in set_cookie
-    assert "HttpOnly" in set_cookie
-    assert "SameSite=lax" in set_cookie
 
 
 def test_logout_without_cookie_is_successful(
