@@ -85,17 +85,31 @@ def login(
 def logout(
     response: Response,
     refresh_token: str | None = Cookie(default=None),
+    csrf_token: str | None = Header(
+        default=None,
+        alias="X-CSRF-TOKEN",
+    ),
     use_case: LogoutSession = Depends(get_logout_session),
 ) -> MessageResponse:
 
     if refresh_token is not None:
+        if csrf_token is None or not verify_csrf_token(refresh_token, csrf_token):
+            raise InvalidRefreshTokenError()
+
         try:
             use_case.execute(refresh_token=refresh_token)
         except InvalidRefreshTokenError:
             pass
 
-    response.delete_cookie("refresh_token")
+    response.delete_cookie(
+        "refresh_token",
+        path="/api/auth",
+    )
 
+    response.delete_cookie(
+        "csrf_refresh_token",
+        path="/",
+    )
     return MessageResponse(message="Logged out successfully.")
 
 

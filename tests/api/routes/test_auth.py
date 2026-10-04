@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi.testclient import TestClient
-from app.api.security.csrf import generate_csrf_token, verify_csrf_token
+
 from app.api.dependencies.auth import (
     get_current_user_use_case,
     get_login_user,
@@ -10,6 +10,7 @@ from app.api.dependencies.auth import (
     get_register_user,
     get_update_current_user,
 )
+from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.application.errors import (
     EmailAlreadyRegisteredError,
     ExpiredAccessTokenError,
