@@ -109,8 +109,6 @@ def refresh(
     ),
     use_case: RefreshSession = Depends(get_refresh_session),
 ) -> AccessTokenResponse:
-    if refresh_token is None:
-        raise InvalidRefreshTokenError()
 
     if (
         refresh_token is None
@@ -120,7 +118,7 @@ def refresh(
         raise InvalidRefreshTokenError()
 
     result = use_case.execute(refresh_token=refresh_token)
-
+    new_csrf_token = generate_csrf_token(result.refresh_token)
     response.set_cookie(
         key="refresh_token",
         value=result.refresh_token,
@@ -128,6 +126,16 @@ def refresh(
         secure=settings.COOKIE_SECURE,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+        path="/api/auth",
+    )
+    response.set_cookie(
+        key="csrf_refresh_token",
+        value=new_csrf_token,
+        httponly=False,
+        secure=settings.COOKIE_SECURE,
+        samesite="lax",
+        max_age=settings.REFRESH_TOKEN_EXPIRES_DAYS * 24 * 60 * 60,
+        path="/",
     )
 
     return AccessTokenResponse(
