@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi.testclient import TestClient
-
+from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.api.dependencies.auth import (
     get_current_user_use_case,
     get_login_user,
@@ -364,8 +364,138 @@ def test_refresh_requires_refresh_cookie(
 
     assert response.status_code == 401
     assert response.json() == {"message": "Invalid refresh token."}
-
     assert fake.received_token is None
+
+
+def test_refresh_requires_csrf_header(
+    client: TestClient,
+) -> None:
+    fake = FakeRefreshSession()
+
+    app.dependency_overrides[get_refresh_session] = lambda: fake
+
+    client.cookies.set(
+        "refresh_token",
+        "old-refresh-token",
+        path="/api/auth",
+    )
+
+    response = client.post("/api/auth/refresh")
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid refresh token."}
+    assert fake.received_token is None
+
+
+def test_refresh_rejects_csrf_bound_to_different_refresh_token(
+    client: TestClient,
+) -> None:
+    fake = FakeRefreshSession()
+
+    app.dependency_overrides[get_refresh_session] = lambda: fake
+
+    client.cookies.set(
+        "refresh_token",
+        "old-refresh-token",
+        path="/api/auth",
+    )
+
+    csrf_token = generate_csrf_token("different-refresh-token")
+
+    response = client.post(
+        "/api/auth/refresh",
+        headers={
+            "X-CSRF-TOKEN": csrf_token,
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid refresh token."}
+    assert fake.received_token is None
+
+
+def test_refresh_returns_access_token_and_rotates_refresh_and_csrf_cookies(
+    client: TestClient,
+) -> None:
+    fake = FakeRefreshSession(
+        result=RefreshResult(
+            access_token="new-access-token",
+            refresh_token="new-refresh-token",
+        )
+    )
+
+    app.dependency_overrides[get_refresh_session] = lambda: fake
+
+    old_refresh_token = "old-refresh-token"
+    old_csrf_token = generate_csrf_token(old_refresh_token)
+
+    client.cookies.set(
+        "refresh_token",
+        old_refresh_token,
+        path="/api/auth",
+    )
+
+    response = client.post(
+        "/api/auth/refresh",
+        headers={
+            "X-CSRF-TOKEN": old_csrf_token,
+        },
+    )
+
+    assert response.status_code == 200
+
+    assert response.json() == {
+        "access_token": "new-access-token",
+        "token_type": "bearer",
+    }
+
+    assert fake.received_token == old_refresh_token
+
+    new_refresh_token = client.cookies.get("refresh_token")
+    new_csrf_token = client.cookies.get("csrf_refresh_token")
+
+    assert new_refresh_token == "new-refresh-token"
+    assert new_csrf_token is not None
+
+    assert verify_csrf_token(
+        refresh_token=new_refresh_token,
+        csrf_token=new_csrf_token,
+    )
+
+    assert not verify_csrf_token(
+        refresh_token=old_refresh_token,
+        csrf_token=new_csrf_token,
+    )
+
+
+def test_refresh_maps_replay_to_unauthorized(
+    client: TestClient,
+) -> None:
+    fake = FakeRefreshSession(
+        error=RefreshTokenReplayError(),
+    )
+
+    app.dependency_overrides[get_refresh_session] = lambda: fake
+
+    refresh_token = "replayed-token"
+    csrf_token = generate_csrf_token(refresh_token)
+
+    client.cookies.set(
+        "refresh_token",
+        refresh_token,
+        path="/api/auth",
+    )
+
+    response = client.post(
+        "/api/auth/refresh",
+        headers={
+            "X-CSRF-TOKEN": csrf_token,
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid refresh token."}
+    assert fake.received_token == refresh_token
 
 
 def test_refresh_returns_access_token_and_rotates_cookie(
@@ -401,26 +531,6 @@ def test_refresh_returns_access_token_and_rotates_cookie(
     assert "refresh_token=new-refresh-token" in set_cookie
     assert "HttpOnly" in set_cookie
     assert "SameSite=lax" in set_cookie
-
-
-def test_refresh_maps_replay_to_unauthorized(
-    client: TestClient,
-) -> None:
-    fake = FakeRefreshSession(
-        error=RefreshTokenReplayError(),
-    )
-
-    app.dependency_overrides[get_refresh_session] = lambda: fake
-
-    client.cookies.set(
-        "refresh_token",
-        "replayed-token",
-    )
-
-    response = client.post("/api/auth/refresh")
-
-    assert response.status_code == 401
-    assert response.json() == {"message": "Invalid refresh token."}
 
 
 def test_logout_without_cookie_is_successful(
