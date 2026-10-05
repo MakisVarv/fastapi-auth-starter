@@ -153,23 +153,21 @@ def request_validation_error_handler(request: Request, exc: Exception) -> JSONRe
     if not isinstance(exc, RequestValidationError):
         raise exc
 
-    errors = []
+    errors: dict[str, list[str]] = {}
 
     for error in exc.errors():
         loc = error["loc"]
         message = error["msg"]
         location_parts = loc[1:]
-        field = (
-            ".".join(str(part) for part in location_parts) if location_parts else None
+        field_name = (
+            ".".join(str(part) for part in location_parts)
+            if location_parts
+            else "_schema"
         )
         if message.startswith("Value error, "):
             message = message.removeprefix("Value error, ")
-        errors.append(
-            {
-                "field": field,
-                "message": message,
-            }
-        )
+
+        errors.setdefault(field_name, []).append(message)
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={"errors": errors},

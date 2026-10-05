@@ -376,7 +376,7 @@ def test_create_role_rejects_invalid_level(
 
     assert response.status_code == 422
 
-    assert any(error["field"] == "level" for error in response.json()["errors"])
+    assert "level" in response.json()["errors"]
 
 
 def test_create_role_maps_duplicate_name_to_conflict(
@@ -447,10 +447,9 @@ def test_update_role_rejects_empty_payload(
 
     assert response.status_code == 422
 
-    assert any(
-        error["message"] == "At least one field must be provided."
-        for error in response.json()["errors"]
-    )
+    assert response.json()["errors"]["_schema"] == [
+        "At least one field must be provided."
+    ]
 
 
 def test_delete_role_returns_no_content(

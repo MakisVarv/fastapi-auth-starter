@@ -319,7 +319,7 @@ def test_list_users_rejects_invalid_pagination(
 
     assert response.status_code == 422
 
-    assert any(error["field"] == "page" for error in response.json()["errors"])
+    assert "page" in response.json()["errors"]
 
 
 def test_list_users_requires_user_read_permission(
@@ -459,7 +459,7 @@ def test_create_user_rejects_short_password(
 
     assert response.status_code == 422
 
-    assert any(error["field"] == "password" for error in response.json()["errors"])
+    assert "password" in response.json()["errors"]
 
 
 def test_update_user_forwards_only_provided_fields(
@@ -513,10 +513,9 @@ def test_update_user_rejects_empty_payload(
 
     assert response.status_code == 422
 
-    assert any(
-        error["message"] == "At least one field must be provided."
-        for error in response.json()["errors"]
-    )
+    assert response.json()["errors"]["_schema"] == [
+        "At least one field must be provided."
+    ]
 
 
 def test_update_user_maps_authorization_error_to_forbidden(

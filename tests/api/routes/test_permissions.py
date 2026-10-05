@@ -181,4 +181,4 @@ def test_get_permission_rejects_invalid_uuid(
 
     assert response.status_code == 422
 
-    assert any(error["field"] == "permission_id" for error in response.json()["errors"])
+    assert "permission_id" in response.json()["errors"]

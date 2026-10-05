@@ -259,10 +259,7 @@ def test_register_returns_validation_error_for_empty_name(
 
     assert response.status_code == 422
 
-    assert {
-        "field": "first_name",
-        "message": "Field cannot be empty.",
-    } in response.json()["errors"]
+    assert response.json()["errors"]["first_name"] == ["Field cannot be empty."]
 
 
 def test_register_maps_duplicate_email_to_conflict(
@@ -773,10 +770,9 @@ def test_update_me_rejects_empty_payload(
 
     assert response.status_code == 422
 
-    assert any(
-        error["message"] == "At least one field must be provided."
-        for error in response.json()["errors"]
-    )
+    assert response.json()["errors"]["_schema"] == [
+        "At least one field must be provided."
+    ]
 
 
 def test_update_me_rejects_null_name(
@@ -800,10 +796,7 @@ def test_update_me_rejects_null_name(
 
     assert response.status_code == 422
 
-    assert {
-        "field": "first_name",
-        "message": "Field cannot be null.",
-    } in response.json()["errors"]
+    assert response.json()["errors"]["first_name"] == ["Field cannot be null."]
 
 
 def test_me_maps_expired_access_token_to_unauthorized(
