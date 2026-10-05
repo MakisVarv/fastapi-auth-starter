@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from app.application.errors import InactiveUserError, InvalidCredentialsError
@@ -38,7 +39,12 @@ class LoginUser:
             if not user.is_active:
                 raise InactiveUserError()
             session_id = uuid4()
-            access_token = self.token_service.create_access_token(user.id)
+            authenticated_at = datetime.now(timezone.utc)
+            access_token = self.token_service.create_access_token(
+                user_id=user.id,
+                session_id=session_id,
+                authenticated_at=authenticated_at,
+            )
             refresh_token = self.token_service.create_refresh_token(
                 user_id=user.id,
                 session_id=session_id,
@@ -48,6 +54,7 @@ class LoginUser:
                 user_id=user.id,
                 current_refresh_jti=refresh_token.jti,
                 expires_at=refresh_token.expires_at,
+                authenticated_at=authenticated_at,
             )
             self.uow.auth_sessions.add(auth_session)
             self.uow.commit()

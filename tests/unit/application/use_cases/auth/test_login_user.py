@@ -6,7 +6,7 @@ import pytest
 
 from app.application.errors import InactiveUserError, InvalidCredentialsError
 from app.application.ports.password_hasher import PasswordHasher
-from app.application.ports.token_service import IssuedRefreshToken, TokenService
+from app.application.ports.token_service import TokenService
 from app.application.ports.unit_of_work import UnitOfWork
 from app.application.use_cases.auth.login_user import LoginUser
 from app.domain.entities.auth_session import AuthSession
@@ -77,34 +77,24 @@ class FakePasswordHasher:
 class FakeTokenService:
     def __init__(self) -> None:
         self.access_token_user_id: UUID | None = None
+        self.access_token_session_id: UUID | None = None
+        self.access_token_authenticated_at: datetime | None = None
+
         self.refresh_token_user_id: UUID | None = None
         self.refresh_token_session_id: UUID | None = None
 
         self.refresh_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
-    def create_access_token(self, user_id: UUID) -> str:
-        self.access_token_user_id = user_id
-        return "access-token"
-
-    def create_refresh_token(
+    def create_access_token(
         self,
         user_id: UUID,
         session_id: UUID,
-    ) -> IssuedRefreshToken:
-        self.refresh_token_user_id = user_id
-        self.refresh_token_session_id = session_id
-
-        return IssuedRefreshToken(
-            token="refresh-token",
-            jti="refresh-jti",
-            expires_at=self.refresh_expires_at,
-        )
-
-    def decode_refresh_token(self, token: str):
-        raise NotImplementedError
-
-    def decode_access_token(self, token: str):
-        raise NotImplementedError
+        authenticated_at: datetime,
+    ) -> str:
+        self.access_token_user_id = user_id
+        self.access_token_session_id = session_id
+        self.access_token_authenticated_at = authenticated_at
+        return "access-token"
 
 
 def make_user(
@@ -155,11 +145,15 @@ def test_login_creates_tokens_session_and_commits() -> None:
     assert token_service.access_token_user_id == user.id
     assert token_service.refresh_token_user_id == user.id
 
-    assert token_service.refresh_token_session_id is not None
+    assert token_service.access_token_session_id is not None
+    assert (
+        token_service.refresh_token_session_id == token_service.access_token_session_id
+    )
 
     added_session = uow.auth_sessions.added_session
     assert added_session is not None
-
+    assert added_session.id == token_service.access_token_session_id
+    assert added_session.authenticated_at == token_service.access_token_authenticated_at
     assert added_session.id == token_service.refresh_token_session_id
     assert added_session.user_id == user.id
     assert added_session.current_refresh_jti == "refresh-jti"

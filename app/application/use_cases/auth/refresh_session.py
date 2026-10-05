@@ -56,7 +56,11 @@ class RefreshSession:
 
             if auth_session.expires_at <= now:
                 raise InvalidRefreshTokenError()
-            new_access_token = self.token_service.create_access_token(user.id)
+            new_access_token = self.token_service.create_access_token(
+                user_id=user.id,
+                session_id=auth_session.id,
+                authenticated_at=auth_session.authenticated_at,
+            )
 
             new_refresh_token = self.token_service.create_refresh_token(
                 user_id=user.id,

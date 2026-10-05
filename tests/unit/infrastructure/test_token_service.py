@@ -26,16 +26,24 @@ def encode(payload: dict) -> str:
     )
 
 
-def test_access_token_round_trip_preserves_user_id(
+def test_access_token_round_trip_preserves_authentication_context(
     token_service: PyJWTTokenService,
 ) -> None:
     user_id = uuid4()
+    session_id = uuid4()
+    authenticated_at = datetime.now(timezone.utc).replace(microsecond=0)
 
-    token = token_service.create_access_token(user_id)
+    token = token_service.create_access_token(
+        user_id=user_id,
+        session_id=session_id,
+        authenticated_at=authenticated_at,
+    )
 
     claims = token_service.decode_access_token(token)
 
     assert claims.user_id == user_id
+    assert claims.session_id == session_id
+    assert claims.authenticated_at == authenticated_at
 
 
 def test_refresh_token_round_trip_preserves_session_identity(
@@ -104,7 +112,11 @@ def test_refresh_token_cannot_be_used_as_access_token(
 def test_access_token_cannot_be_used_as_refresh_token(
     token_service: PyJWTTokenService,
 ) -> None:
-    token = token_service.create_access_token(uuid4())
+    token = token_service.create_access_token(
+        user_id=uuid4(),
+        session_id=uuid4(),
+        authenticated_at=datetime.now(timezone.utc),
+    )
 
     with pytest.raises(InvalidRefreshTokenError):
         token_service.decode_refresh_token(token)

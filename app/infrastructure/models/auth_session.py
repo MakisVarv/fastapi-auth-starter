@@ -27,3 +27,8 @@ class AuthSessionModel(BaseModel):
         DateTime(timezone=True),
         nullable=True,
     )
+
+    authenticated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )

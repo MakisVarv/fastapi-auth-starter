@@ -17,11 +17,19 @@ from app.infrastructure.config import settings
 
 
 class PyJWTTokenService:
-    def create_access_token(self, user_id: UUID) -> str:
+
+    def create_access_token(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        authenticated_at: datetime,
+    ) -> str:
         now = datetime.now(timezone.utc)
         expires_at = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRES_MINUTES)
         payload = {
             "sub": str(user_id),
+            "sid": str(session_id),
+            "auth_time": int(authenticated_at.timestamp()),
             "type": "access",
             "exp": expires_at,
         }
@@ -94,7 +102,16 @@ class PyJWTTokenService:
             raise InvalidAccessTokenError()
         try:
             user_id = UUID(payload["sub"])
+            session_id = UUID(payload["sid"])
+            authenticated_at = datetime.fromtimestamp(
+                payload["auth_time"],
+                tz=timezone.utc,
+            )
         except (KeyError, ValueError, TypeError) as exc:
             raise InvalidAccessTokenError() from exc
 
-        return AccessTokenClaims(user_id)
+        return AccessTokenClaims(
+            user_id=user_id,
+            session_id=session_id,
+            authenticated_at=authenticated_at,
+        )

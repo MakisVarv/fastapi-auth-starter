@@ -10,5 +10,6 @@ class AuthSession(BaseEntity):
     user_id: UUID
     current_refresh_jti: str
     expires_at: datetime
+    authenticated_at: datetime
 
     revoked_at: datetime | None = None

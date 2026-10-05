@@ -24,6 +24,7 @@ class SqlAlchemyAuthSessionRepository:
             expires_at=model.expires_at,
             id=model.id,
             revoked_at=model.revoked_at,
+            authenticated_at=model.authenticated_at,
         )
 
     def add(self, auth_session: AuthSession) -> None:
@@ -34,6 +35,7 @@ class SqlAlchemyAuthSessionRepository:
             expires_at=auth_session.expires_at,
             id=auth_session.id,
             revoked_at=auth_session.revoked_at,
+            authenticated_at=auth_session.authenticated_at,
         )
 
         self.session.add(model)
@@ -47,3 +49,4 @@ class SqlAlchemyAuthSessionRepository:
         model.current_refresh_jti = auth_session.current_refresh_jti
         model.expires_at = auth_session.expires_at
         model.revoked_at = auth_session.revoked_at
+        model.authenticated_at = auth_session.authenticated_at
