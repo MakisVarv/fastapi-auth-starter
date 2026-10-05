@@ -1,4 +1,3 @@
-from typing import Tuple
 from uuid import UUID
 
 from sqlalchemy import Select, func, or_, select
@@ -44,7 +43,7 @@ class SqlAlchemyUserRepository(SqlAlchemyRepository[User, UserModel]):
             statement = statement.where(UserModel.is_active == is_active)
         return statement
 
-    def _base_query(self) -> Select[Tuple[UserModel]]:
+    def _base_query(self) -> Select[UserModel]:
         return (
             super()
             ._base_query()

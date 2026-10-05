@@ -24,8 +24,8 @@ class Pagination:
     def paginate(
         *,
         session: Session,
-        statement: Select[tuple[ModelT]],
-        count_statement: Select[tuple[int]],
+        statement: Select[ModelT],
+        count_statement: Select[int],
         page: int = 1,
         page_size: int = 20,
     ) -> tuple[Sequence[ModelT], PaginationMetadata]:

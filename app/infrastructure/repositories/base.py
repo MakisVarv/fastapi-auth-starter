@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Tuple, TypeVar
+from typing import Generic, TypeVar
 from uuid import UUID
 
 from sqlalchemy import Select, select
@@ -22,8 +22,8 @@ class SqlAlchemyRepository(Generic[DomainT, ModelT], ABC):
 
     def _paginate(
         self,
-        statement: Select[tuple[ModelT]],
-        count_statement: Select[tuple[int]],
+        statement: Select[ModelT],
+        count_statement: Select[int],
         *,
         page: int,
         page_size: int,
@@ -49,7 +49,7 @@ class SqlAlchemyRepository(Generic[DomainT, ModelT], ABC):
             return None
         return self._to_domain(model)
 
-    def _base_query(self) -> Select[Tuple[ModelT]]:
+    def _base_query(self) -> Select[ModelT]:
         return select(self.model_type)
 
     def delete(self, entity: DomainT) -> None:

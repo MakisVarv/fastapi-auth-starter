@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from typing import Tuple
 
 from sqlalchemy import Select, select
 from sqlalchemy.orm import selectinload
@@ -14,7 +13,7 @@ from app.infrastructure.repositories.base import SqlAlchemyRepository
 class SqlAlchemyRoleRepository(SqlAlchemyRepository[Role, RoleModel]):
     model_type = RoleModel
 
-    def _base_query(self) -> Select[Tuple[RoleModel]]:
+    def _base_query(self) -> Select[RoleModel]:
         return super()._base_query().options(selectinload(RoleModel.permissions))
 
     def _to_domain(self, model: RoleModel) -> Role:
