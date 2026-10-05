@@ -128,7 +128,7 @@ def assign_permission(
 
 @router.delete(
     "/{role_id}/permissions/{permission_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=RoleResponse,
     dependencies=[Depends(require_permission("role.assign_permission"))],
 )
 def remove_permission(
@@ -136,5 +136,8 @@ def remove_permission(
     role_id: UUID,
     current_user: User = Depends(get_current_user),
     use_case: RemovePermission = Depends(get_remove_permission),
-) -> None:
-    use_case.execute(actor=current_user, role_id=role_id, permission_id=permission_id)
+) -> RoleResponse:
+    role = use_case.execute(
+        actor=current_user, role_id=role_id, permission_id=permission_id
+    )
+    return RoleResponse.model_validate(role)

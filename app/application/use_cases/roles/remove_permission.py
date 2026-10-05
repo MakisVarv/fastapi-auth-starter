@@ -9,6 +9,7 @@ from app.application.errors import (
 )
 from app.application.ports.unit_of_work import UnitOfWork
 from app.domain.authorization import can_manage_role
+from app.domain.entities.role import Role
 from app.domain.entities.user import User
 
 
@@ -16,7 +17,12 @@ class RemovePermission:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
-    def execute(self, actor: User, role_id: UUID, permission_id: UUID) -> None:
+    def execute(
+        self,
+        actor: User,
+        role_id: UUID,
+        permission_id: UUID,
+    ) -> Role:
 
         with self.uow:
             role = self.uow.roles.get_by_id(role_id)
@@ -37,3 +43,4 @@ class RemovePermission:
             role.permissions.remove(assigned_permission)
             self.uow.roles.remove_permission(role=role, permission=permission)
             self.uow.commit()
+            return role
