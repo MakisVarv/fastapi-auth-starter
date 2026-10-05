@@ -219,7 +219,8 @@ class FakeAssignPermission:
 
 
 class FakeRemovePermission:
-    def __init__(self) -> None:
+    def __init__(self, role: Role) -> None:
+        self.role = role
         self.received_actor: User | None = None
         self.received_role_id: UUID | None = None
         self.received_permission_id: UUID | None = None
@@ -230,10 +231,12 @@ class FakeRemovePermission:
         actor: User,
         role_id: UUID,
         permission_id: UUID,
-    ) -> None:
+    ) -> Role:
         self.received_actor = actor
         self.received_role_id = role_id
         self.received_permission_id = permission_id
+
+        return self.role
 
 
 def test_list_roles_returns_roles(
@@ -552,7 +555,7 @@ def test_assign_permission_maps_duplicate_assignment_to_conflict(
     assert response.json() == {"message": "Permission already assigned to role."}
 
 
-def test_remove_permission_returns_no_content(
+def test_remove_permission_returns_updated_role(
     client: TestClient,
 ) -> None:
     actor = make_admin()
@@ -560,15 +563,20 @@ def test_remove_permission_returns_no_content(
     role_id = uuid4()
     permission_id = uuid4()
 
-    fake = FakeRemovePermission()
+    role = make_role(name="Support", level=40)
+    role.id = role_id
+    fake = FakeRemovePermission(role)
 
     app.dependency_overrides[get_current_user] = lambda: actor
     app.dependency_overrides[get_remove_permission] = lambda: fake
 
     response = client.delete(f"/api/roles/{role_id}/permissions/{permission_id}")
+    assert response.status_code == 200
 
-    assert response.status_code == 204
-    assert response.content == b""
+    body = response.json()
+
+    assert body["id"] == str(role_id)
+    assert body["name"] == role.name
 
     assert fake.received_actor is actor
     assert fake.received_role_id == role_id
