@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Protocol
 from uuid import UUID
 
@@ -21,10 +21,14 @@ class RefreshTokenClaims:
 @dataclass(frozen=True)
 class AccessTokenClaims:
     user_id: UUID
+    is_fresh: bool
 
 
 class TokenService(Protocol):
-    def create_access_token(self, user_id: UUID) -> str: ...
+
+    def create_access_token(
+        self, user_id: UUID, session_id: UUID, authenticated_at: datetime
+    ) -> str: ...
 
     def create_refresh_token(
         self,
