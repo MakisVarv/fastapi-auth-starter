@@ -16,3 +16,20 @@ class SqlAlchemyPermissionRepository(SqlAlchemyRepository[Permission, Permission
         permissions = self.session.scalars(statement).all()
 
         return [self._to_domain(permission) for permission in permissions]
+
+    def add(self, permission: Permission) -> None:
+        model = PermissionModel(
+            id=permission.id,
+            name=permission.name,
+            description=permission.description,
+        )
+        self.session.add(model)
+
+    def update(self, permission: Permission) -> None:
+        model = self.session.get(PermissionModel, permission.id)
+
+        if model is None:
+            return
+
+        model.name = permission.name
+        model.description = permission.description

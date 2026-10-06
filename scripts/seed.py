@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.common.permissions import PERMISSIONS
 from app.infrastructure.models import PermissionModel, RoleModel
 from app.infrastructure.models.user import UserModel
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
@@ -22,27 +23,6 @@ class SeedSettings(BaseSettings):
     )
 
 
-PERMISSIONS: list[dict[str, str]] = [
-    # Users
-    {"name": "user.read", "description": "Read user information"},
-    {"name": "user.create", "description": "Create users"},
-    {"name": "user.update", "description": "Update users"},
-    {"name": "user.delete", "description": "Delete users"},
-    {"name": "user.change_role", "description": "Change a user's role"},
-    # Roles
-    {"name": "role.read", "description": "Read roles"},
-    {"name": "role.create", "description": "Create roles"},
-    {"name": "role.update", "description": "Update roles"},
-    {"name": "role.delete", "description": "Delete roles"},
-    {
-        "name": "role.assign_permission",
-        "description": "Assign or remove permissions from roles",
-    },
-    # Permissions
-    {"name": "permission.read", "description": "Read permissions"},
-    # Dashboard
-    {"name": "dashboard.read", "description": "View dashboard"},
-]
 ROLES: list[dict[str, str | int]] = [
     {"name": "Admin", "description": "Full system administrator", "level": 100},
     {"name": "User", "description": "Standard system user", "level": 10},
