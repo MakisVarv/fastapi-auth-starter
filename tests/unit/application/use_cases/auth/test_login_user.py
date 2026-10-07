@@ -6,7 +6,10 @@ import pytest
 
 from app.application.errors import InactiveUserError, InvalidCredentialsError
 from app.application.ports.password_hasher import PasswordHasher
-from app.application.ports.token_service import TokenService
+from app.application.ports.token_service import (
+    IssuedRefreshToken,
+    TokenService,
+)
 from app.application.ports.unit_of_work import UnitOfWork
 from app.application.use_cases.auth.login_user import LoginUser
 from app.domain.entities.auth_session import AuthSession
@@ -84,6 +87,20 @@ class FakeTokenService:
         self.refresh_token_session_id: UUID | None = None
 
         self.refresh_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+    def create_refresh_token(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+    ) -> IssuedRefreshToken:
+        self.refresh_token_user_id = user_id
+        self.refresh_token_session_id = session_id
+
+        return IssuedRefreshToken(
+            token="refresh-token",
+            jti="refresh-jti",
+            expires_at=self.refresh_expires_at,
+        )
 
     def create_access_token(
         self,

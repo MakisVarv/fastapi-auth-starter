@@ -76,7 +76,12 @@ class FakeTokenService:
         self.decoded_token = token
         return self.claims
 
-    def create_access_token(self, user_id: UUID) -> str:
+    def create_access_token(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        authenticated_at: datetime,
+    ) -> str:
         raise NotImplementedError
 
     def create_refresh_token(self, user_id: UUID, session_id: UUID):
@@ -92,12 +97,14 @@ def make_auth_session(
     session_id: UUID,
     jti: str = "current-jti",
     revoked_at: datetime | None = None,
+    authenticated_at: datetime | None = None,
 ) -> AuthSession:
     return AuthSession(
         id=session_id,
         user_id=user_id,
         current_refresh_jti=jti,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        authenticated_at=authenticated_at or datetime.now(timezone.utc),
         revoked_at=revoked_at,
     )
 

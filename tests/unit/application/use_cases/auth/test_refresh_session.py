@@ -104,6 +104,8 @@ class FakeTokenService:
             jti="new-refresh-jti",
             expires_at=datetime.now(timezone.utc) + timedelta(days=7),
         )
+        self.access_token_session_id: UUID | None = None
+        self.access_token_authenticated_at: datetime | None = None
 
     def decode_refresh_token(
         self,
@@ -112,8 +114,16 @@ class FakeTokenService:
         self.decoded_token = token
         return self.claims
 
-    def create_access_token(self, user_id: UUID) -> str:
+    def create_access_token(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        authenticated_at: datetime,
+    ) -> str:
         self.access_token_user_id = user_id
+        self.access_token_session_id = session_id
+        self.access_token_authenticated_at = authenticated_at
+
         return "new-access-token"
 
     def create_refresh_token(
@@ -151,12 +161,14 @@ def make_auth_session(
     jti: str = "current-jti",
     revoked_at: datetime | None = None,
     expires_at: datetime | None = None,
+    authenticated_at: datetime | None = None,
 ) -> AuthSession:
     return AuthSession(
         id=session_id,
         user_id=user_id,
         current_refresh_jti=jti,
         expires_at=expires_at or datetime.now(timezone.utc) + timedelta(days=1),
+        authenticated_at=authenticated_at or datetime.now(timezone.utc),
         revoked_at=revoked_at,
     )
 
@@ -212,7 +224,8 @@ def test_refresh_rotates_tokens_updates_session_and_commits() -> None:
 
     assert auth_session.current_refresh_jti == "new-refresh-jti"
     assert auth_session.expires_at == token_service.new_refresh_token.expires_at
-
+    assert token_service.access_token_session_id == auth_session.id
+    assert token_service.access_token_authenticated_at == auth_session.authenticated_at
     assert uow.auth_sessions.updated_session is auth_session
     assert uow.committed is True
 

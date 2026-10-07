@@ -33,11 +33,13 @@ def make_auth_session(
     *,
     user_id,
     current_refresh_jti: str = "refresh-jti-1",
+    authenticated_at: datetime | None = None,
 ) -> AuthSession:
     return AuthSession(
         user_id=user_id,
         current_refresh_jti=current_refresh_jti,
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        authenticated_at=authenticated_at or datetime.now(timezone.utc),
     )
 
 
@@ -60,7 +62,6 @@ def test_add_and_get_by_id_persists_auth_session(
     db_session.commit()
 
     auth_session = make_auth_session(user_id=user.id)
-
     auth_session_repository.add(auth_session)
     db_session.commit()
     db_session.expire_all()
@@ -68,6 +69,7 @@ def test_add_and_get_by_id_persists_auth_session(
     persisted_session = auth_session_repository.get_by_id(auth_session.id)
 
     assert persisted_session is not None
+    assert persisted_session.authenticated_at == auth_session.authenticated_at
     assert persisted_session.id == auth_session.id
     assert persisted_session.user_id == user.id
     assert persisted_session.current_refresh_jti == "refresh-jti-1"
@@ -127,6 +129,7 @@ def test_update_missing_auth_session_raises_not_found(
         user_id=uuid4(),
         current_refresh_jti="missing-jti",
         expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+        authenticated_at=datetime.now(timezone.utc),
     )
 
     with pytest.raises(AuthSessionNotFoundError):

@@ -1,5 +1,6 @@
+from datetime import datetime, timezone
 from typing import cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -12,6 +13,14 @@ from app.application.ports.unit_of_work import UnitOfWork
 from app.application.use_cases.auth.get_current_user import GetCurrentUser
 from app.domain.entities.role import Role
 from app.domain.entities.user import User
+
+
+def make_access_claims(user_id: UUID) -> AccessTokenClaims:
+    return AccessTokenClaims(
+        user_id=user_id,
+        session_id=uuid4(),
+        authenticated_at=datetime.now(timezone.utc),
+    )
 
 
 class FakeUserRepository:
@@ -53,7 +62,12 @@ class FakeTokenService:
         self.decoded_token = token
         return self.claims
 
-    def create_access_token(self, user_id: UUID) -> str:
+    def create_access_token(
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        authenticated_at: datetime,
+    ) -> str:
         raise NotImplementedError
 
     def create_refresh_token(self, user_id: UUID, session_id: UUID):
@@ -81,7 +95,7 @@ def test_get_current_user_returns_active_user() -> None:
     user = make_user()
 
     uow = FakeUnitOfWork(user)
-    token_service = FakeTokenService(AccessTokenClaims(user_id=user.id))
+    token_service = FakeTokenService(make_access_claims(user.id))
 
     use_case = GetCurrentUser(
         uow=cast(UnitOfWork, uow),
@@ -99,7 +113,7 @@ def test_get_current_user_rejects_missing_user() -> None:
     user = make_user()
 
     uow = FakeUnitOfWork(None)
-    token_service = FakeTokenService(AccessTokenClaims(user_id=user.id))
+    token_service = FakeTokenService(make_access_claims(user.id))
 
     use_case = GetCurrentUser(
         uow=cast(UnitOfWork, uow),
@@ -116,7 +130,7 @@ def test_get_current_user_rejects_inactive_user() -> None:
     user = make_user(is_active=False)
 
     uow = FakeUnitOfWork(user)
-    token_service = FakeTokenService(AccessTokenClaims(user_id=user.id))
+    token_service = FakeTokenService(make_access_claims(user.id))
 
     use_case = GetCurrentUser(
         uow=cast(UnitOfWork, uow),
