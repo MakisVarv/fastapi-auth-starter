@@ -5,8 +5,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 import app.infrastructure.models  # noqa: F401
+from app.application.use_cases.permissions.sync_permissions import SyncPermissions
 from app.infrastructure.database.base import Base
-from scripts.seed import seed_permissions, seed_role_permissions, seed_roles
+from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
+from scripts.seed import seed_roles
 from tests.integration.config import test_settings
 
 test_engine = create_engine(test_settings.TEST_DATABASE_URL)
@@ -23,9 +25,13 @@ def setup_database() -> None:
     Base.metadata.create_all(test_engine)
 
     with TestSessionFactory() as session:
-        seed_permissions(session)
         seed_roles(session)
-        seed_role_permissions(session)
+
+    uow = SqlAlchemyUnitOfWork(TestSessionFactory)
+    result = SyncPermissions(uow).execute()
+
+    if result.stale:
+        raise RuntimeError(f"Stale permissions detected: {', '.join(result.stale)}")
 
 
 @pytest.fixture
