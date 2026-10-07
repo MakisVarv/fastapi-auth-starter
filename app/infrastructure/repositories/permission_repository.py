@@ -11,6 +11,14 @@ class SqlAlchemyPermissionRepository(SqlAlchemyRepository[Permission, Permission
     def _to_domain(self, model: PermissionModel) -> Permission:
         return Permission(id=model.id, name=model.name, description=model.description)
 
+    def get_by_name(self, name: str) -> Permission | None:
+        model = self.session.scalar(
+            self._base_query().where(PermissionModel.name == name)
+        )
+        if model is None:
+            return None
+        return self._to_domain(model)
+
     def list_all(self) -> Sequence[Permission]:
         statement = self._base_query()
         permissions = self.session.scalars(statement).all()
