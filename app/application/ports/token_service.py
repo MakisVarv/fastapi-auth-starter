@@ -23,12 +23,17 @@ class AccessTokenClaims:
     user_id: UUID
     session_id: UUID
     authenticated_at: datetime
+    is_fresh: bool
 
 
 class TokenService(Protocol):
 
     def create_access_token(
-        self, user_id: UUID, session_id: UUID, authenticated_at: datetime
+        self,
+        user_id: UUID,
+        session_id: UUID,
+        authenticated_at: datetime,
+        is_fresh: bool,
     ) -> str: ...
 
     def create_refresh_token(

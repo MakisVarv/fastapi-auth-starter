@@ -23,6 +23,7 @@ class PyJWTTokenService:
         user_id: UUID,
         session_id: UUID,
         authenticated_at: datetime,
+        is_fresh: bool,
     ) -> str:
         now = datetime.now(timezone.utc)
         expires_at = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRES_MINUTES)
@@ -30,6 +31,7 @@ class PyJWTTokenService:
             "sub": str(user_id),
             "sid": str(session_id),
             "auth_time": int(authenticated_at.timestamp()),
+            "fresh": is_fresh,
             "type": "access",
             "exp": expires_at,
         }
@@ -107,6 +109,9 @@ class PyJWTTokenService:
                 payload["auth_time"],
                 tz=timezone.utc,
             )
+            fresh = payload.get("fresh", False)
+            if not isinstance(fresh, bool):
+                raise InvalidAccessTokenError()
         except (KeyError, ValueError, TypeError) as exc:
             raise InvalidAccessTokenError() from exc
 
@@ -114,4 +119,5 @@ class PyJWTTokenService:
             user_id=user_id,
             session_id=session_id,
             authenticated_at=authenticated_at,
+            is_fresh=fresh,
         )
