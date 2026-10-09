@@ -44,6 +44,7 @@ class LoginUser:
                 user_id=user.id,
                 session_id=session_id,
                 authenticated_at=authenticated_at,
+                is_fresh=True,
             )
             refresh_token = self.token_service.create_refresh_token(
                 user_id=user.id,

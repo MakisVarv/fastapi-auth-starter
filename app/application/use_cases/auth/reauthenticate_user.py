@@ -50,6 +50,7 @@ class ReauthenticateUser:
                 user_id=user.id,
                 session_id=session.id,
                 authenticated_at=session.authenticated_at,
+                is_fresh=True,
             )
             self.uow.commit()
             return access_token

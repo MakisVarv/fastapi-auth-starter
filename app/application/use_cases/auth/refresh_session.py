@@ -60,6 +60,7 @@ class RefreshSession:
                 user_id=user.id,
                 session_id=auth_session.id,
                 authenticated_at=auth_session.authenticated_at,
+                is_fresh=False,
             )
 
             new_refresh_token = self.token_service.create_refresh_token(
