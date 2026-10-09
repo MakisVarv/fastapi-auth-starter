@@ -1,6 +1,10 @@
 from datetime import datetime, timezone
 
-from app.application.errors import InactiveUserError, InvalidAccessTokenError
+from app.application.errors import (
+    InactiveUserError,
+    InvalidAccessTokenError,
+    InvalidCredentialsError,
+)
 from app.application.ports.password_hasher import PasswordHasher
 from app.application.ports.token_service import TokenService
 from app.application.ports.unit_of_work import UnitOfWork
@@ -35,3 +39,17 @@ class ReauthenticateUser:
                 raise InvalidAccessTokenError()
             if session.revoked_at is not None:
                 raise InvalidAccessTokenError()
+            password_ok = self.password_hasher.verify(
+                current_password, user.password_hash
+            )
+            if not password_ok:
+                raise InvalidCredentialsError()
+            session.authenticated_at = datetime.now(timezone.utc)
+            self.uow.auth_sessions.update(session)
+            access_token = self.token_service.create_access_token(
+                user_id=user.id,
+                session_id=session.id,
+                authenticated_at=session.authenticated_at,
+            )
+            self.uow.commit()
+            return access_token
