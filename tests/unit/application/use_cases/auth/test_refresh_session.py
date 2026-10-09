@@ -224,6 +224,7 @@ def test_refresh_rotates_tokens_updates_session_and_commits() -> None:
     assert token_service.access_token_user_id == user.id
     assert token_service.refresh_token_user_id == user.id
     assert token_service.refresh_token_session_id == session_id
+    assert token_service.access_token_is_fresh is False
 
     assert auth_session.current_refresh_jti == "new-refresh-jti"
     assert auth_session.expires_at == token_service.new_refresh_token.expires_at

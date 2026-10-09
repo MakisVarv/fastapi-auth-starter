@@ -163,7 +163,7 @@ def test_login_creates_tokens_session_and_commits() -> None:
 
     assert token_service.access_token_user_id == user.id
     assert token_service.refresh_token_user_id == user.id
-
+    assert token_service.access_token_is_fresh is True
     assert token_service.access_token_session_id is not None
     assert (
         token_service.refresh_token_session_id == token_service.access_token_session_id
