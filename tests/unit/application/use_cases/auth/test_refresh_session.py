@@ -95,6 +95,7 @@ class FakeTokenService:
 
         self.decoded_token: str | None = None
         self.access_token_user_id: UUID | None = None
+        self.access_token_is_fresh: bool | None = None
 
         self.refresh_token_user_id: UUID | None = None
         self.refresh_token_session_id: UUID | None = None
@@ -119,10 +120,12 @@ class FakeTokenService:
         user_id: UUID,
         session_id: UUID,
         authenticated_at: datetime,
+        is_fresh: bool,
     ) -> str:
         self.access_token_user_id = user_id
         self.access_token_session_id = session_id
         self.access_token_authenticated_at = authenticated_at
+        self.access_token_is_fresh = is_fresh
 
         return "new-access-token"
 

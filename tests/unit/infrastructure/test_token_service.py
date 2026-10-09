@@ -37,6 +37,7 @@ def test_access_token_round_trip_preserves_authentication_context(
         user_id=user_id,
         session_id=session_id,
         authenticated_at=authenticated_at,
+        is_fresh=True,
     )
 
     claims = token_service.decode_access_token(token)
@@ -116,6 +117,7 @@ def test_access_token_cannot_be_used_as_refresh_token(
         user_id=uuid4(),
         session_id=uuid4(),
         authenticated_at=datetime.now(timezone.utc),
+        is_fresh=False,
     )
 
     with pytest.raises(InvalidRefreshTokenError):

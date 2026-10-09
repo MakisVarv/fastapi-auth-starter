@@ -20,6 +20,7 @@ def make_access_claims(user_id: UUID) -> AccessTokenClaims:
         user_id=user_id,
         session_id=uuid4(),
         authenticated_at=datetime.now(timezone.utc),
+        is_fresh=True,
     )
 
 
@@ -67,6 +68,7 @@ class FakeTokenService:
         user_id: UUID,
         session_id: UUID,
         authenticated_at: datetime,
+        is_fresh: bool,
     ) -> str:
         raise NotImplementedError
 
