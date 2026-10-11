@@ -44,6 +44,10 @@ class LoginResponse(AccessTokenResponse):
     user: UserResponse
 
 
+class ReauthenticateRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+
+
 class UpdateMeRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None

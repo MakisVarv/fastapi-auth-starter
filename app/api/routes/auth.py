@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Cookie, Depends, Header, Response
+from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies.auth import (
+    bearer_scheme,
     get_current_user,
     get_login_user,
     get_logout_session,
+    get_reauthenticate_user,
     get_refresh_session,
     get_register_user,
     get_update_current_user,
@@ -12,15 +15,17 @@ from app.api.schemas.auth import (
     AccessTokenResponse,
     LoginRequest,
     LoginResponse,
+    ReauthenticateRequest,
     RegisterRequest,
     UpdateMeRequest,
 )
 from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
-from app.application.errors import InvalidRefreshTokenError
+from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from app.application.use_cases.auth.login_user import LoginUser
 from app.application.use_cases.auth.logout_session import LogoutSession
+from app.application.use_cases.auth.reauthenticate_user import ReauthenticateUser
 from app.application.use_cases.auth.refresh_session import RefreshSession
 from app.application.use_cases.auth.register_user import RegisterUser
 from app.application.use_cases.auth.update_current_user import UpdateCurrentUser
@@ -155,6 +160,22 @@ def refresh(
     return AccessTokenResponse(
         access_token=result.access_token,
     )
+
+
+@router.post("/reauthenticate", response_model=AccessTokenResponse)
+def reauthenticate(
+    response: Response,
+    payload: ReauthenticateRequest,
+    use_case: ReauthenticateUser = Depends(get_reauthenticate_user),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+):
+    if credentials is None:
+        raise InvalidAccessTokenError()
+    access_token = credentials.credentials
+    result = use_case.execute(
+        access_token=access_token, current_password=payload.current_password
+    )
+    return AccessTokenResponse(access_token=result)
 
 
 @router.get("/me", response_model=UserResponse)
