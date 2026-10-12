@@ -72,17 +72,6 @@ def get_update_current_user() -> UpdateCurrentUser:
     return UpdateCurrentUser(uow=uow)
 
 
-def require_permission(permission_name: str) -> Callable[..., None]:
-
-    def dependency(
-        user: User = Depends(require_auth()),
-    ) -> None:
-        if not user.role.has_permission(permission_name):
-            raise PermissionDeniedError()
-
-    return dependency
-
-
 def require_auth(*, fresh: bool = False) -> Callable[..., User]:
     def dependency(
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
@@ -93,5 +82,16 @@ def require_auth(*, fresh: bool = False) -> Callable[..., User]:
         token = credentials.credentials
         user = use_case.execute(token=token, require_fresh=fresh)
         return user
+
+    return dependency
+
+
+def require_permission(permission_name: str) -> Callable[..., None]:
+
+    def dependency(
+        user: User = Depends(require_auth()),
+    ) -> None:
+        if not user.role.has_permission(permission_name):
+            raise PermissionDeniedError()
 
     return dependency
