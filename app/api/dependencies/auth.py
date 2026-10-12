@@ -1,3 +1,4 @@
+from functools import cache
 from typing import Callable
 
 from fastapi import Depends
@@ -72,6 +73,7 @@ def get_update_current_user() -> UpdateCurrentUser:
     return UpdateCurrentUser(uow=uow)
 
 
+@cache
 def require_auth(*, fresh: bool = False) -> Callable[..., User]:
     def dependency(
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
