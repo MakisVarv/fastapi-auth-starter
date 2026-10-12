@@ -37,6 +37,10 @@ class RefreshTokenReplayError(Exception):
     pass
 
 
+class FreshAuthenticationRequiredError(Exception):
+    pass
+
+
 class UserNotFoundError(Exception):
     pass
 

@@ -11,6 +11,7 @@ from app.application.errors import (
     DeleteRoleWithUsersError,
     EmailAlreadyRegisteredError,
     ExpiredAccessTokenError,
+    FreshAuthenticationRequiredError,
     InactiveUserError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
@@ -106,6 +107,11 @@ ERROR_RESPONSES = {
         status.HTTP_401_UNAUTHORIZED,
         "Access token has expired.",
         "access_token_expired",
+    ),
+    FreshAuthenticationRequiredError: ErrorResponse(
+        status.HTTP_401_UNAUTHORIZED,
+        "Fresh authentication required.",
+        "fresh_auth_required",
     ),
 }
 
