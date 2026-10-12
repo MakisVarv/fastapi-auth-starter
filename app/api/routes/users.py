@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import (
-    get_current_user,
+    require_auth,
     require_permission,
 )
 from app.api.dependencies.users import (
@@ -81,7 +81,7 @@ def get_user(
 )
 def create_user(
     payload: CreateUserRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: CreateUser = Depends(get_create_user),
 ) -> UserResponse:
 
@@ -105,7 +105,7 @@ def create_user(
 def update_user(
     payload: UpdateUserRequest,
     user_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: UpdateUser = Depends(get_update_user),
 ) -> UserResponse:
     updates = payload.model_dump(exclude_unset=True)
@@ -121,7 +121,7 @@ def update_user(
 def change_user_status(
     payload: UserStatusRequest,
     user_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: ChangeUserStatus = Depends(get_change_status),
 ) -> UserResponse:
     user = use_case.execute(
@@ -138,7 +138,7 @@ def change_user_status(
 def change_user_role(
     payload: ChangeRoleRequest,
     user_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: ChangeUserRole = Depends(get_change_role),
 ) -> UserResponse:
     user = use_case.execute(
@@ -154,7 +154,7 @@ def change_user_role(
 )
 def delete_user(
     user_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: DeleteUser = Depends(get_delete_user),
 ) -> None:
     use_case.execute(actor=current_user, user_id=user_id)

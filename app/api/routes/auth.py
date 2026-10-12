@@ -3,13 +3,13 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies.auth import (
     bearer_scheme,
-    get_current_user,
     get_login_user,
     get_logout_session,
     get_reauthenticate_user,
     get_refresh_session,
     get_register_user,
     get_update_current_user,
+    require_auth,
 )
 from app.api.schemas.auth import (
     AccessTokenResponse,
@@ -180,7 +180,7 @@ def reauthenticate(
 
 @router.get("/me", response_model=UserResponse)
 def me(
-    response: Response, current_user: User = Depends(get_current_user)
+    response: Response, current_user: User = Depends(require_auth())
 ) -> UserResponse:
 
     return UserResponse.model_validate(current_user)
@@ -189,7 +189,7 @@ def me(
 @router.patch("/me", response_model=UserResponse)
 def update_me(
     payload: UpdateMeRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: UpdateCurrentUser = Depends(get_update_current_user),
 ) -> UserResponse:
     updates = payload.model_dump(exclude_unset=True)

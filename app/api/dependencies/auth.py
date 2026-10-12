@@ -1,3 +1,5 @@
+from typing import Callable
+
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -70,21 +72,26 @@ def get_update_current_user() -> UpdateCurrentUser:
     return UpdateCurrentUser(uow=uow)
 
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
-    use_case: GetCurrentUser = Depends(get_current_user_use_case),
-) -> User:
-    if credentials is None:
-        raise InvalidAccessTokenError()
-    user = use_case.execute(credentials.credentials)
-    return user
+def require_permission(permission_name: str) -> Callable[..., None]:
 
-
-def require_permission(permission_name: str):
     def dependency(
-        user: User = Depends(get_current_user),
+        user: User = Depends(require_auth()),
     ) -> None:
         if not user.role.has_permission(permission_name):
             raise PermissionDeniedError()
+
+    return dependency
+
+
+def require_auth(*, fresh: bool = False) -> Callable[..., User]:
+    def dependency(
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+        use_case: GetCurrentUser = Depends(get_current_user_use_case),
+    ) -> User:
+        if credentials is None:
+            raise InvalidAccessTokenError()
+        token = credentials.credentials
+        user = use_case.execute(token=token, require_fresh=fresh)
+        return user
 
     return dependency

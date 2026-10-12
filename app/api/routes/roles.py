@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
 
-from app.api.dependencies.auth import get_current_user, require_permission
+from app.api.dependencies.auth import require_auth, require_permission
 from app.api.dependencies.roles import (
     get_assign_permission,
     get_create_role,
@@ -64,7 +64,7 @@ def get_role(
 )
 def create_role(
     payload: CreateRoleRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: CreateRole = Depends(get_create_role),
 ) -> RoleResponse:
     role = use_case.execute(
@@ -84,7 +84,7 @@ def create_role(
 def update_role(
     role_id: UUID,
     payload: UpdateRoleRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: UpdateRole = Depends(get_update_role),
 ) -> RoleResponse:
     updates = cast(
@@ -102,7 +102,7 @@ def update_role(
 )
 def delete_role(
     role_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: DeleteRole = Depends(get_delete_role),
 ) -> None:
     use_case.execute(actor=current_user, role_id=role_id)
@@ -117,7 +117,7 @@ def delete_role(
 def assign_permission(
     payload: AddPermissionRequest,
     role_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: AssignPermission = Depends(get_assign_permission),
 ) -> RoleResponse:
     role = use_case.execute(
@@ -134,7 +134,7 @@ def assign_permission(
 def remove_permission(
     permission_id: UUID,
     role_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_auth()),
     use_case: RemovePermission = Depends(get_remove_permission),
 ) -> RoleResponse:
     role = use_case.execute(
