@@ -4,6 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from app.api.dependencies.auth import (
     ChangePassword,
     bearer_scheme,
+    get_change_email,
     get_change_password,
     get_login_user,
     get_logout_session,
@@ -15,6 +16,7 @@ from app.api.dependencies.auth import (
 )
 from app.api.schemas.auth import (
     AccessTokenResponse,
+    ChangeEmailRequest,
     ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
@@ -26,6 +28,7 @@ from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
+from app.application.use_cases.auth.change_email import ChangeEmail
 from app.application.use_cases.auth.login_user import LoginUser
 from app.application.use_cases.auth.logout_session import LogoutSession
 from app.application.use_cases.auth.reauthenticate_user import ReauthenticateUser
@@ -189,6 +192,26 @@ def change_password(
     current_user: User = Depends(require_auth(fresh=True)),
 ) -> MessageResponse:
     use_case.execute(user_id=current_user.id, new_password=payload.new_password)
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/auth",
+    )
+
+    response.delete_cookie(
+        key="csrf_refresh_token",
+        path="/",
+    )
+    return MessageResponse(message="Password changed successfully.")
+
+
+@router.post("/change-email", response_model=MessageResponse)
+def change_email(
+    response: Response,
+    payload: ChangeEmailRequest,
+    use_case: ChangeEmail = Depends(get_change_email),
+    current_user: User = Depends(require_auth(fresh=True)),
+) -> MessageResponse:
+    use_case.execute(user_id=current_user.id, new_email=payload.new_email)
     response.delete_cookie(
         key="refresh_token",
         path="/api/auth",

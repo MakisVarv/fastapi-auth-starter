@@ -48,6 +48,14 @@ class ReauthenticateRequest(BaseModel):
     current_password: str = Field(min_length=1)
 
 
+class ChangePasswordRequest(BaseModel):
+    new_password: str = Field(min_length=8)
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+
+
 class UpdateMeRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
@@ -77,7 +85,3 @@ class UpdateMeRequest(BaseModel):
         if not value.strip():
             raise ValueError("Field cannot be empty.")
         return value.strip()
-
-
-class ChangePasswordRequest(BaseModel):
-    new_password: str = Field(min_length=8)

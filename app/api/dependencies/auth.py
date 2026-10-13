@@ -5,6 +5,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.errors import InvalidAccessTokenError, PermissionDeniedError
+from app.application.use_cases.auth.change_email import ChangeEmail
 from app.application.use_cases.auth.change_password import ChangePassword
 from app.application.use_cases.auth.get_current_user import GetCurrentUser
 from app.application.use_cases.auth.login_user import LoginUser
@@ -78,6 +79,11 @@ def get_change_password() -> ChangePassword:
     password_hasher = Argon2PasswordHasher()
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return ChangePassword(uow=uow, password_hasher=password_hasher)
+
+
+def get_change_email() -> ChangeEmail:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return ChangeEmail(uow=uow)
 
 
 @cache
