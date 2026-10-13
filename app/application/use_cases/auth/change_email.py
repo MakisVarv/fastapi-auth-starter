@@ -17,7 +17,7 @@ class ChangeEmail:
     ) -> None:
         self.uow = uow
 
-    def execute(self, user_id: UUID, new_email: str) -> None:
+    def execute(self, user_id: UUID, new_email: str) -> bool:
         with self.uow:
             user = self.uow.users.get_by_id(user_id)
             if user is None:
@@ -28,10 +28,11 @@ class ChangeEmail:
             if exists and exists.id != user.id:
                 raise EmailAlreadyRegisteredError()
             if new_email == user.email:
-                return
+                return False
             self.uow.auth_sessions.revoke_all_for_user(
                 user_id=user_id, revoked_at=datetime.now(timezone.utc)
             )
             user.email = new_email
             self.uow.users.update(user)
             self.uow.commit()
+            return True

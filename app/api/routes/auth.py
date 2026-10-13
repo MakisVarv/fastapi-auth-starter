@@ -211,17 +211,18 @@ def change_email(
     use_case: ChangeEmail = Depends(get_change_email),
     current_user: User = Depends(require_auth(fresh=True)),
 ) -> MessageResponse:
-    use_case.execute(user_id=current_user.id, new_email=payload.new_email)
-    response.delete_cookie(
-        key="refresh_token",
-        path="/api/auth",
-    )
+    changed = use_case.execute(user_id=current_user.id, new_email=payload.new_email)
+    if changed:
+        response.delete_cookie(
+            key="refresh_token",
+            path="/api/auth",
+        )
 
-    response.delete_cookie(
-        key="csrf_refresh_token",
-        path="/",
-    )
-    return MessageResponse(message="Password changed successfully.")
+        response.delete_cookie(
+            key="csrf_refresh_token",
+            path="/",
+        )
+    return MessageResponse(message="Email changed successfully.")
 
 
 @router.get("/me", response_model=UserResponse)
