@@ -183,12 +183,22 @@ def reauthenticate(
 
 @router.post("/change-password", response_model=MessageResponse)
 def change_password(
-    response=Response,
-    payload=ChangePasswordRequest,
+    response: Response,
+    payload: ChangePasswordRequest,
     use_case: ChangePassword = Depends(get_change_password),
     current_user: User = Depends(require_auth(fresh=True)),
-):
+) -> MessageResponse:
     use_case.execute(user_id=current_user.id, new_password=payload.new_password)
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/auth",
+    )
+
+    response.delete_cookie(
+        key="csrf_refresh_token",
+        path="/",
+    )
+    return MessageResponse(message="Password changed successfully.")
 
 
 @router.get("/me", response_model=UserResponse)
