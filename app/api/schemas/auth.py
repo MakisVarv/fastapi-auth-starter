@@ -77,3 +77,7 @@ class UpdateMeRequest(BaseModel):
         if not value.strip():
             raise ValueError("Field cannot be empty.")
         return value.strip()
+
+
+class ChangePasswordRequest(BaseModel):
+    new_password: str = Field(min_length=8)

@@ -5,6 +5,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.application.errors import InvalidAccessTokenError, PermissionDeniedError
+from app.application.use_cases.auth.change_password import ChangePassword
 from app.application.use_cases.auth.get_current_user import GetCurrentUser
 from app.application.use_cases.auth.login_user import LoginUser
 from app.application.use_cases.auth.logout_session import LogoutSession
@@ -71,6 +72,12 @@ def get_reauthenticate_user() -> ReauthenticateUser:
 def get_update_current_user() -> UpdateCurrentUser:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return UpdateCurrentUser(uow=uow)
+
+
+def get_change_password() -> ChangePassword:
+    password_hasher = Argon2PasswordHasher()
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return ChangePassword(uow=uow, password_hasher=password_hasher)
 
 
 @cache

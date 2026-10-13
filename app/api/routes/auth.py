@@ -2,7 +2,9 @@ from fastapi import APIRouter, Cookie, Depends, Header, Response
 from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies.auth import (
+    ChangePassword,
     bearer_scheme,
+    get_change_password,
     get_login_user,
     get_logout_session,
     get_reauthenticate_user,
@@ -13,6 +15,7 @@ from app.api.dependencies.auth import (
 )
 from app.api.schemas.auth import (
     AccessTokenResponse,
+    ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
     ReauthenticateRequest,
@@ -176,6 +179,16 @@ def reauthenticate(
         access_token=access_token, current_password=payload.current_password
     )
     return AccessTokenResponse(access_token=result)
+
+
+@router.post("/change-password", response_model=MessageResponse)
+def change_password(
+    response=Response,
+    payload=ChangePasswordRequest,
+    use_case: ChangePassword = Depends(get_change_password),
+    current_user: User = Depends(require_auth(fresh=True)),
+):
+    use_case.execute(user_id=current_user.id, new_password=payload.new_password)
 
 
 @router.get("/me", response_model=UserResponse)
