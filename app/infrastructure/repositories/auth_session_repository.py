@@ -1,6 +1,7 @@
-import uuid
+from datetime import datetime
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.application.errors import AuthSessionNotFoundError
@@ -12,7 +13,7 @@ class SqlAlchemyAuthSessionRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def get_by_id(self, session_id: uuid.UUID) -> AuthSession | None:
+    def get_by_id(self, session_id: UUID) -> AuthSession | None:
         model = self.session.scalar(
             select(AuthSessionModel).where(AuthSessionModel.id == session_id)
         )
@@ -50,3 +51,18 @@ class SqlAlchemyAuthSessionRepository:
         model.expires_at = auth_session.expires_at
         model.revoked_at = auth_session.revoked_at
         model.authenticated_at = auth_session.authenticated_at
+
+    def revoke_all_for_user(
+        self,
+        user_id: UUID,
+        revoked_at: datetime,
+    ) -> None:
+        stmt = (
+            update(AuthSessionModel)
+            .where(
+                AuthSessionModel.user_id == user_id,
+                AuthSessionModel.revoked_at.is_(None),
+            )
+            .values(revoked_at=revoked_at)
+        )
+        self.session.execute(stmt)
