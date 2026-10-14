@@ -101,7 +101,7 @@ ERROR_RESPONSES = {
         "Invalid access token.",
     ),
     InvalidPasswordResetTokenError: ErrorResponse(
-        status.HTTP_401_UNAUTHORIZED,
+        status.HTTP_400_BAD_REQUEST,
         "Invalid password reset token.",
     ),
     RefreshTokenReplayError: ErrorResponse(

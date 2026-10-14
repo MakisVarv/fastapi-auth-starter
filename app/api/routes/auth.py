@@ -5,6 +5,7 @@ from app.api.dependencies.auth import (
     ChangePassword,
     LogoutAll,
     RequestPasswordReset,
+    ResetPassword,
     bearer_scheme,
     get_change_email,
     get_change_password,
@@ -15,6 +16,7 @@ from app.api.dependencies.auth import (
     get_refresh_session,
     get_register_user,
     get_request_password_reset,
+    get_reset_password,
     get_update_current_user,
     require_auth,
 )
@@ -27,6 +29,7 @@ from app.api.schemas.auth import (
     LoginResponse,
     ReauthenticateRequest,
     RegisterRequest,
+    ResetPasswordRequest,
     UpdateMeRequest,
 )
 from app.api.schemas.common import MessageResponse
@@ -215,6 +218,15 @@ def request_password_reset(
     return MessageResponse(
         message="If an account exists for this email, password reset instructions will be sent."
     )
+
+
+@router.post("/reset-password", response_model=MessageResponse)
+def reset_password(
+    payload: ResetPasswordRequest,
+    use_case: ResetPassword = Depends(get_reset_password),
+):
+    use_case.execute(raw_token=payload.token, new_password=payload.new_password)
+    return MessageResponse(message="Password was changed successfully!")
 
 
 @router.post("/logout-all", response_model=MessageResponse)

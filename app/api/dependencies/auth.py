@@ -15,6 +15,7 @@ from app.application.use_cases.auth.reauthenticate_user import ReauthenticateUse
 from app.application.use_cases.auth.refresh_session import RefreshSession
 from app.application.use_cases.auth.register_user import RegisterUser
 from app.application.use_cases.auth.request_password_reset import RequestPasswordReset
+from app.application.use_cases.auth.reset_password import ResetPassword
 from app.application.use_cases.auth.update_current_user import UpdateCurrentUser
 from app.domain.entities.user import User
 from app.infrastructure.config import settings
@@ -110,6 +111,12 @@ def get_request_password_reset() -> RequestPasswordReset:
         uow=uow,
         password_reset_mailer=mailer,
     )
+
+
+def get_reset_password() -> ResetPassword:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    password_hasher = Argon2PasswordHasher()
+    return ResetPassword(uow=uow, password_hasher=password_hasher)
 
 
 @cache
