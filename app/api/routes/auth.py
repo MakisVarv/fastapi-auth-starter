@@ -224,7 +224,7 @@ def request_password_reset(
 def reset_password(
     payload: ResetPasswordRequest,
     use_case: ResetPassword = Depends(get_reset_password),
-):
+) -> MessageResponse:
     use_case.execute(raw_token=payload.token, new_password=payload.new_password)
     return MessageResponse(message="Password was changed successfully!")
 
