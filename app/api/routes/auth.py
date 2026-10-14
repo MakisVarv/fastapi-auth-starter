@@ -28,6 +28,7 @@ from app.api.schemas.auth import (
 )
 from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
+from app.api.security.auth_cookies import clear_auth_cookies
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from app.application.use_cases.auth.change_email import ChangeEmail
@@ -113,16 +114,7 @@ def logout(
             use_case.execute(refresh_token=refresh_token)
         except InvalidRefreshTokenError:
             pass
-
-    response.delete_cookie(
-        "refresh_token",
-        path="/api/auth",
-    )
-
-    response.delete_cookie(
-        "csrf_refresh_token",
-        path="/",
-    )
+    clear_auth_cookies(response)
     return MessageResponse(message="Logged out successfully.")
 
 
@@ -194,15 +186,7 @@ def change_password(
     current_user: User = Depends(require_auth(fresh=True)),
 ) -> MessageResponse:
     use_case.execute(user_id=current_user.id, new_password=payload.new_password)
-    response.delete_cookie(
-        key="refresh_token",
-        path="/api/auth",
-    )
-
-    response.delete_cookie(
-        key="csrf_refresh_token",
-        path="/",
-    )
+    clear_auth_cookies(response)
     return MessageResponse(message="Password changed successfully.")
 
 
@@ -215,15 +199,7 @@ def change_email(
 ) -> MessageResponse:
     changed = use_case.execute(user_id=current_user.id, new_email=payload.new_email)
     if changed:
-        response.delete_cookie(
-            key="refresh_token",
-            path="/api/auth",
-        )
-
-        response.delete_cookie(
-            key="csrf_refresh_token",
-            path="/",
-        )
+        clear_auth_cookies(response)
     return MessageResponse(message="Email changed successfully.")
 
 
@@ -232,18 +208,10 @@ def logout_all(
     response: Response,
     use_case: LogoutAll = Depends(get_logout_all),
     current_user: User = Depends(require_auth(fresh=True)),
-):
+) -> MessageResponse:
     user_id = current_user.id
     use_case.execute(user_id=user_id)
-    response.delete_cookie(
-        key="refresh_token",
-        path="/api/auth",
-    )
-
-    response.delete_cookie(
-        key="csrf_refresh_token",
-        path="/",
-    )
+    clear_auth_cookies(response)
     return MessageResponse(message="Account logged out from all devices successfully.")
 
 
