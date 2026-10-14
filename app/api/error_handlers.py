@@ -15,6 +15,7 @@ from app.application.errors import (
     InactiveUserError,
     InvalidAccessTokenError,
     InvalidCredentialsError,
+    InvalidPasswordResetTokenError,
     InvalidRefreshTokenError,
     PasswordResetTokenNotFoundError,
     PermissionAlreadyInRoleError,
@@ -98,6 +99,10 @@ ERROR_RESPONSES = {
     InvalidAccessTokenError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,
         "Invalid access token.",
+    ),
+    InvalidPasswordResetTokenError: ErrorResponse(
+        status.HTTP_401_UNAUTHORIZED,
+        "Invalid password reset token.",
     ),
     RefreshTokenReplayError: ErrorResponse(
         status.HTTP_401_UNAUTHORIZED,

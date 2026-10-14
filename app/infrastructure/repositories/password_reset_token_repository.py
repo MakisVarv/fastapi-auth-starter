@@ -23,9 +23,9 @@ class SqlAlchemyPasswordResetTokenRepository:
     def get_by_token_hash(self, token_hash: str) -> PasswordResetToken | None:
 
         model = self.session.scalar(
-            select(PasswordResetTokenModel).where(
-                PasswordResetTokenModel.token_hash == token_hash
-            )
+            select(PasswordResetTokenModel)
+            .where(PasswordResetTokenModel.token_hash == token_hash)
+            .with_for_update()
         )
 
         if model is None:
