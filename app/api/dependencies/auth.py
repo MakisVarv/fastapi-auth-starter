@@ -14,9 +14,12 @@ from app.application.use_cases.auth.logout_session import LogoutSession
 from app.application.use_cases.auth.reauthenticate_user import ReauthenticateUser
 from app.application.use_cases.auth.refresh_session import RefreshSession
 from app.application.use_cases.auth.register_user import RegisterUser
+from app.application.use_cases.auth.request_password_reset import RequestPasswordReset
 from app.application.use_cases.auth.update_current_user import UpdateCurrentUser
 from app.domain.entities.user import User
+from app.infrastructure.config import settings
 from app.infrastructure.database.session import SessionFactory
+from app.infrastructure.mail.password_reset_mailer import SmtpPasswordResetMailer
 from app.infrastructure.security.password_hasher import Argon2PasswordHasher
 from app.infrastructure.security.token_service import PyJWTTokenService
 from app.infrastructure.uow.sqlalchemy import SqlAlchemyUnitOfWork
@@ -90,6 +93,21 @@ def get_change_email() -> ChangeEmail:
 def get_logout_all() -> LogoutAll:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return LogoutAll(uow=uow)
+
+
+def get_request_password_reset() -> RequestPasswordReset:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    mailer = SmtpPasswordResetMailer(
+        smtp_host=settings.SMTP_HOST,
+        smtp_port=settings.SMTP_PORT,
+        sender_email=settings.SMTP_SENDER_EMAIL,
+        frontend_reset_url=settings.FRONTEND_RESET_URL,
+        use_starttls=settings.SMTP_USE_STARTTLS,
+    )
+    return RequestPasswordReset(
+        uow=uow,
+        password_reset_mailer=mailer,
+    )
 
 
 @cache

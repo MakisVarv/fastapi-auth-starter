@@ -14,11 +14,11 @@ class ResetPassword:
     def execute(self, raw_token: str, new_password: str) -> None:
 
         token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
-        now = datetime.now(timezone.utc)
         with self.uow:
             token = self.uow.password_reset_tokens.get_by_token_hash(
                 token_hash=token_hash
             )
+            now = datetime.now(timezone.utc)
             if token is None:
                 raise InvalidPasswordResetTokenError()
             if token.used_at is not None:
