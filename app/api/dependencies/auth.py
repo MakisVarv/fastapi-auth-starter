@@ -9,6 +9,7 @@ from app.application.use_cases.auth.change_email import ChangeEmail
 from app.application.use_cases.auth.change_password import ChangePassword
 from app.application.use_cases.auth.get_current_user import GetCurrentUser
 from app.application.use_cases.auth.login_user import LoginUser
+from app.application.use_cases.auth.logout_all import LogoutAll
 from app.application.use_cases.auth.logout_session import LogoutSession
 from app.application.use_cases.auth.reauthenticate_user import ReauthenticateUser
 from app.application.use_cases.auth.refresh_session import RefreshSession
@@ -84,6 +85,11 @@ def get_change_password() -> ChangePassword:
 def get_change_email() -> ChangeEmail:
     uow = SqlAlchemyUnitOfWork(SessionFactory)
     return ChangeEmail(uow=uow)
+
+
+def get_logout_all() -> LogoutAll:
+    uow = SqlAlchemyUnitOfWork(SessionFactory)
+    return LogoutAll(uow=uow)
 
 
 @cache

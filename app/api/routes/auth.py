@@ -3,10 +3,12 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies.auth import (
     ChangePassword,
+    LogoutAll,
     bearer_scheme,
     get_change_email,
     get_change_password,
     get_login_user,
+    get_logout_all,
     get_logout_session,
     get_reauthenticate_user,
     get_refresh_session,
@@ -223,6 +225,26 @@ def change_email(
             path="/",
         )
     return MessageResponse(message="Email changed successfully.")
+
+
+@router.post("/logout-all", response_model=MessageResponse)
+def logout_all(
+    response: Response,
+    use_case: LogoutAll = Depends(get_logout_all),
+    current_user: User = Depends(require_auth(fresh=True)),
+):
+    user_id = current_user.id
+    use_case.execute(user_id=user_id)
+    response.delete_cookie(
+        key="refresh_token",
+        path="/api/auth",
+    )
+
+    response.delete_cookie(
+        key="csrf_refresh_token",
+        path="/",
+    )
+    return MessageResponse(message="Account logged out from all devices successfully.")
 
 
 @router.get("/me", response_model=UserResponse)
