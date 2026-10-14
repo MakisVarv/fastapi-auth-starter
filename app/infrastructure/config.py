@@ -3,7 +3,15 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DATABASE_URL: str
+    SMTP_HOST: str
+    SMTP_PORT: int
+    SMTP_SENDER_EMAIL: str
 
+    SMTP_USERNAME: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_USE_STARTTLS: bool = True
+
+    FRONTEND_RESET_URL: str
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRES_MINUTES: int = 15
