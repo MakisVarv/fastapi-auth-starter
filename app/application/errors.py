@@ -45,6 +45,10 @@ class UserNotFoundError(Exception):
     pass
 
 
+class PasswordResetTokenNotFoundError(Exception):
+    pass
+
+
 class RegistrationRoleNotFoundError(Exception):
     pass
 

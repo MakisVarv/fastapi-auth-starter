@@ -16,6 +16,7 @@ from app.application.errors import (
     InvalidAccessTokenError,
     InvalidCredentialsError,
     InvalidRefreshTokenError,
+    PasswordResetTokenNotFoundError,
     PermissionAlreadyInRoleError,
     PermissionDeniedError,
     PermissionNotFoundError,
@@ -50,6 +51,9 @@ ERROR_RESPONSES = {
     RoleNotFoundError: ErrorResponse(status.HTTP_404_NOT_FOUND, "Role not found!"),
     PermissionNotFoundError: ErrorResponse(
         status.HTTP_404_NOT_FOUND, "Permission not found!"
+    ),
+    PasswordResetTokenNotFoundError: ErrorResponse(
+        status.HTTP_404_NOT_FOUND, "Password reset token not found!"
     ),
     RoleAlreadyExist: ErrorResponse(
         status.HTTP_409_CONFLICT,
