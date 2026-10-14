@@ -56,6 +56,10 @@ class ChangeEmailRequest(BaseModel):
     new_email: EmailStr
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
 class UpdateMeRequest(BaseModel):
     first_name: str | None = None
     last_name: str | None = None

@@ -4,6 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from app.api.dependencies.auth import (
     ChangePassword,
     LogoutAll,
+    RequestPasswordReset,
     bearer_scheme,
     get_change_email,
     get_change_password,
@@ -13,6 +14,7 @@ from app.api.dependencies.auth import (
     get_reauthenticate_user,
     get_refresh_session,
     get_register_user,
+    get_request_password_reset,
     get_update_current_user,
     require_auth,
 )
@@ -20,6 +22,7 @@ from app.api.schemas.auth import (
     AccessTokenResponse,
     ChangeEmailRequest,
     ChangePasswordRequest,
+    ForgotPasswordRequest,
     LoginRequest,
     LoginResponse,
     ReauthenticateRequest,
@@ -201,6 +204,17 @@ def change_email(
     if changed:
         clear_auth_cookies(response)
     return MessageResponse(message="Email changed successfully.")
+
+
+@router.post("/forgot-password", response_model=MessageResponse)
+def request_password_reset(
+    payload: ForgotPasswordRequest,
+    use_case: RequestPasswordReset = Depends(get_request_password_reset),
+) -> MessageResponse:
+    use_case.execute(email=payload.email)
+    return MessageResponse(
+        message="If an account exists for this email, password reset instructions will be sent."
+    )
 
 
 @router.post("/logout-all", response_model=MessageResponse)

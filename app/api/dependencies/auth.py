@@ -103,6 +103,8 @@ def get_request_password_reset() -> RequestPasswordReset:
         sender_email=settings.SMTP_SENDER_EMAIL,
         frontend_reset_url=settings.FRONTEND_RESET_URL,
         use_starttls=settings.SMTP_USE_STARTTLS,
+        smtp_username=settings.SMTP_USERNAME,
+        smtp_password=settings.SMTP_PASSWORD,
     )
     return RequestPasswordReset(
         uow=uow,
