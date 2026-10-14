@@ -3,11 +3,17 @@ from typing import Self
 from sqlalchemy.orm import sessionmaker
 
 from app.application.ports.auth_session_repository import AuthSessionRepository
+from app.application.ports.password_reset_token_repository import (
+    PasswordResetTokenRepository,
+)
 from app.application.ports.permission_repository import PermissionRepository
 from app.application.ports.role_repository import RoleRepository
 from app.application.ports.user_repository import UserRepository
 from app.infrastructure.repositories.auth_session_repository import (
     SqlAlchemyAuthSessionRepository,
+)
+from app.infrastructure.repositories.password_reset_token_repository import (
+    SqlAlchemyPasswordResetTokenRepository,
 )
 from app.infrastructure.repositories.permission_repository import (
     SqlAlchemyPermissionRepository,
@@ -21,6 +27,7 @@ class SqlAlchemyUnitOfWork:
     auth_sessions: AuthSessionRepository
     roles: RoleRepository
     permissions: PermissionRepository
+    password_reset_tokens: PasswordResetTokenRepository
 
     def __init__(self, session_factory: sessionmaker) -> None:
         self.session_factory = session_factory
@@ -31,6 +38,9 @@ class SqlAlchemyUnitOfWork:
         self.roles = SqlAlchemyRoleRepository(self.session)
         self.permissions = SqlAlchemyPermissionRepository(self.session)
         self.auth_sessions = SqlAlchemyAuthSessionRepository(self.session)
+        self.password_reset_tokens = SqlAlchemyPasswordResetTokenRepository(
+            self.session
+        )
         return self
 
     def commit(self) -> None:

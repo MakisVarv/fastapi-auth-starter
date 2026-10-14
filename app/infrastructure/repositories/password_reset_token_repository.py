@@ -12,6 +12,7 @@ class SqlAlchemyPasswordResetTokenRepository:
 
     def add(self, token: PasswordResetToken) -> None:
         model = PasswordResetTokenModel(
+            id=token.id,
             user_id=token.user_id,
             token_hash=token.token_hash,
             expires_at=token.expires_at,
@@ -31,6 +32,7 @@ class SqlAlchemyPasswordResetTokenRepository:
             return None
 
         return PasswordResetToken(
+            id=model.id,
             user_id=model.user_id,
             token_hash=model.token_hash,
             expires_at=model.expires_at,
