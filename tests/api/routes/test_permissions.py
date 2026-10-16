@@ -2,7 +2,7 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-from app.api.dependencies.auth import get_current_user
+from app.api.dependencies.auth import require_auth
 from app.api.dependencies.permissions import (
     get_list_permissions,
     get_permission_use_case,
@@ -82,7 +82,7 @@ def test_list_permissions_returns_permissions(
 
     fake = FakeListPermissions(permissions)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_permissions] = lambda: fake
 
     response = client.get("/api/permissions")
@@ -108,7 +108,7 @@ def test_list_permissions_requires_permission_read(
 
     fake = FakeListPermissions([])
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_permissions] = lambda: fake
 
     response = client.get("/api/permissions")
@@ -133,7 +133,7 @@ def test_get_permission_returns_permission(
         permission=permission,
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_permission_use_case] = lambda: fake
 
     response = client.get(f"/api/permissions/{permission.id}")
@@ -159,7 +159,7 @@ def test_get_permission_maps_missing_permission_to_not_found(
         error=PermissionNotFoundError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_permission_use_case] = lambda: fake
 
     response = client.get(f"/api/permissions/{missing_id}")
@@ -175,7 +175,7 @@ def test_get_permission_rejects_invalid_uuid(
 ) -> None:
     actor = make_actor()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.get("/api/permissions/not-a-uuid")
 

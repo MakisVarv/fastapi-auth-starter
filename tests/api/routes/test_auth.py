@@ -170,7 +170,12 @@ class FakeGetCurrentUser:
         self.error = error
         self.received_token: str | None = None
 
-    def execute(self, token: str) -> User:
+    def execute(
+        self,
+        token: str,
+        *,
+        require_fresh: bool = False,
+    ) -> User:
         self.received_token = token
 
         if self.error is not None:

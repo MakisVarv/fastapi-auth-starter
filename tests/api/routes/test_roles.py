@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-from app.api.dependencies.auth import get_current_user
+from app.api.dependencies.auth import require_auth
 from app.api.dependencies.roles import (
     get_assign_permission,
     get_create_role,
@@ -251,7 +251,7 @@ def test_list_roles_returns_roles(
 
     fake = FakeListRoles(roles)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_roles] = lambda: fake
 
     response = client.get("/api/roles")
@@ -274,7 +274,7 @@ def test_list_roles_requires_role_read_permission(
 
     fake = FakeListRoles([])
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_roles] = lambda: fake
 
     response = client.get("/api/roles")
@@ -293,7 +293,7 @@ def test_get_role_returns_role(
 
     fake = FakeGetRole(role=role)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_role_use_case] = lambda: fake
 
     response = client.get(f"/api/roles/{role.id}")
@@ -315,7 +315,7 @@ def test_get_role_maps_missing_role_to_not_found(
         error=RoleNotFoundError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_role_use_case] = lambda: fake
 
     response = client.get(f"/api/roles/{missing_id}")
@@ -337,7 +337,7 @@ def test_create_role_returns_created_role_and_forwards_payload(
 
     fake = FakeCreateRole(role=role)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_create_role] = lambda: fake
 
     response = client.post(
@@ -367,7 +367,7 @@ def test_create_role_rejects_invalid_level(
 ) -> None:
     actor = make_admin()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.post(
         "/api/roles",
@@ -391,7 +391,7 @@ def test_create_role_maps_duplicate_name_to_conflict(
         error=RoleAlreadyExist(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_create_role] = lambda: fake
 
     response = client.post(
@@ -418,7 +418,7 @@ def test_update_role_forwards_only_provided_fields(
 
     fake = FakeUpdateRole(role=role)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_update_role] = lambda: fake
 
     response = client.patch(
@@ -441,7 +441,7 @@ def test_update_role_rejects_empty_payload(
 ) -> None:
     actor = make_admin()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.patch(
         f"/api/roles/{uuid4()}",
@@ -463,7 +463,7 @@ def test_delete_role_returns_no_content(
 
     fake = FakeDeleteRole()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_delete_role] = lambda: fake
 
     response = client.delete(f"/api/roles/{role_id}")
@@ -485,7 +485,7 @@ def test_delete_role_maps_protected_role_to_conflict(
         error=ProtectedRoleDeletionError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_delete_role] = lambda: fake
 
     response = client.delete(f"/api/roles/{role_id}")
@@ -509,7 +509,7 @@ def test_assign_permission_returns_updated_role(
 
     fake = FakeAssignPermission(role=role)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_assign_permission] = lambda: fake
 
     response = client.post(
@@ -541,7 +541,7 @@ def test_assign_permission_maps_duplicate_assignment_to_conflict(
         error=PermissionAlreadyInRoleError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_assign_permission] = lambda: fake
 
     response = client.post(
@@ -567,7 +567,7 @@ def test_remove_permission_returns_updated_role(
     role.id = role_id
     fake = FakeRemovePermission(role)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_remove_permission] = lambda: fake
 
     response = client.delete(f"/api/roles/{role_id}/permissions/{permission_id}")

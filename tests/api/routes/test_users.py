@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-from app.api.dependencies.auth import get_current_user
+from app.api.dependencies.auth import require_auth
 from app.api.dependencies.users import (
     get_change_role,
     get_change_status,
@@ -260,7 +260,7 @@ def test_list_users_returns_paginated_response_and_forwards_query(
         )
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_users] = lambda: fake
 
     response = client.get(
@@ -310,7 +310,7 @@ def test_list_users_rejects_invalid_pagination(
 ) -> None:
     actor = make_admin()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.get(
         "/api/users",
@@ -342,7 +342,7 @@ def test_list_users_requires_user_read_permission(
         )
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_list_users] = lambda: fake
 
     response = client.get("/api/users")
@@ -361,7 +361,7 @@ def test_get_user_returns_user(
 
     fake = FakeGetUser(user=user)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_user_use_case] = lambda: fake
 
     response = client.get(f"/api/users/{user.id}")
@@ -383,7 +383,7 @@ def test_get_user_maps_missing_user_to_not_found(
         error=UserNotFoundError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_user_use_case] = lambda: fake
 
     response = client.get(f"/api/users/{missing_id}")
@@ -406,7 +406,7 @@ def test_create_user_returns_created_user_and_forwards_payload(
 
     fake = FakeCreateUser(created_user)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_create_user] = lambda: fake
 
     response = client.post(
@@ -444,7 +444,7 @@ def test_create_user_rejects_short_password(
 ) -> None:
     actor = make_admin()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.post(
         "/api/users",
@@ -476,7 +476,7 @@ def test_update_user_forwards_only_provided_fields(
 
     fake = FakeUpdateUser(user=updated)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_update_user] = lambda: fake
 
     response = client.patch(
@@ -504,7 +504,7 @@ def test_update_user_rejects_empty_payload(
 ) -> None:
     actor = make_admin()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
 
     response = client.patch(
         f"/api/users/{uuid4()}",
@@ -528,7 +528,7 @@ def test_update_user_maps_authorization_error_to_forbidden(
         error=AuthorizationError(AuthorizationReason.CANNOT_MANAGE_USER)
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_update_user] = lambda: fake
 
     response = client.patch(
@@ -553,7 +553,7 @@ def test_change_user_status_returns_updated_user(
 
     fake = FakeChangeUserStatus(target)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_change_status] = lambda: fake
 
     response = client.patch(
@@ -585,7 +585,7 @@ def test_change_user_role_forwards_role_id(
 
     fake = FakeChangeUserRole(target)
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_change_role] = lambda: fake
 
     response = client.patch(
@@ -610,7 +610,7 @@ def test_delete_user_returns_no_content(
 
     fake = FakeDeleteUser()
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_delete_user] = lambda: fake
 
     response = client.delete(f"/api/users/{target_id}")
@@ -632,7 +632,7 @@ def test_delete_user_maps_active_user_error_to_conflict(
         error=ActiveUserDeletionError(),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: actor
+    app.dependency_overrides[require_auth()] = lambda: actor
     app.dependency_overrides[get_delete_user] = lambda: fake
 
     response = client.delete(f"/api/users/{target_id}")

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import cast
 from uuid import UUID, uuid4
 
@@ -11,6 +11,7 @@ from app.application.ports.token_service import (
 )
 from app.application.ports.unit_of_work import UnitOfWork
 from app.application.use_cases.auth.get_current_user import GetCurrentUser
+from app.domain.entities.auth_session import AuthSession
 from app.domain.entities.role import Role
 from app.domain.entities.user import User
 
@@ -22,6 +23,21 @@ def make_access_claims(user_id: UUID) -> AccessTokenClaims:
         authenticated_at=datetime.now(timezone.utc),
         is_fresh=True,
     )
+
+
+class FakeAuthSessionRepository:
+
+    def __init__(self, session: AuthSession | None) -> None:
+        self.session = session
+        self.requested_id: UUID | None = None
+
+    def get_by_id(self, session_id: UUID) -> AuthSession | None:
+        self.requested_id = session_id
+
+        if self.session is not None and self.session.id == session_id:
+            return self.session
+
+        return None
 
 
 class FakeUserRepository:
@@ -39,8 +55,9 @@ class FakeUserRepository:
 
 
 class FakeUnitOfWork:
-    def __init__(self, user: User | None) -> None:
+    def __init__(self, user: User | None, session: AuthSession | None) -> None:
         self.users = FakeUserRepository(user)
+        self.auth_sessions = FakeAuthSessionRepository(session)
 
     def __enter__(self):
         return self
@@ -95,9 +112,18 @@ def make_user(*, is_active: bool = True) -> User:
 
 def test_get_current_user_returns_active_user() -> None:
     user = make_user()
+    claims = make_access_claims(user.id)
 
-    uow = FakeUnitOfWork(user)
-    token_service = FakeTokenService(make_access_claims(user.id))
+    session = AuthSession(
+        id=claims.session_id,
+        user_id=user.id,
+        current_refresh_jti="test-jti",
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+        authenticated_at=datetime.now(timezone.utc),
+    )
+
+    uow = FakeUnitOfWork(user, session)
+    token_service = FakeTokenService(claims)
 
     use_case = GetCurrentUser(
         uow=cast(UnitOfWork, uow),
@@ -114,7 +140,7 @@ def test_get_current_user_returns_active_user() -> None:
 def test_get_current_user_rejects_missing_user() -> None:
     user = make_user()
 
-    uow = FakeUnitOfWork(None)
+    uow = FakeUnitOfWork(None, None)
     token_service = FakeTokenService(make_access_claims(user.id))
 
     use_case = GetCurrentUser(
@@ -131,7 +157,7 @@ def test_get_current_user_rejects_missing_user() -> None:
 def test_get_current_user_rejects_inactive_user() -> None:
     user = make_user(is_active=False)
 
-    uow = FakeUnitOfWork(user)
+    uow = FakeUnitOfWork(user, None)
     token_service = FakeTokenService(make_access_claims(user.id))
 
     use_case = GetCurrentUser(
