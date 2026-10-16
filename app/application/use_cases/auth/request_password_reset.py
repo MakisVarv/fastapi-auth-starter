@@ -20,6 +20,7 @@ class RequestPasswordReset:
             user = self.uow.users.get_by_email(email=email)
             if user is None or not user.is_active:
                 return
+            self.uow.password_reset_tokens.delete_unused_for_user(user_id=user.id)
             raw_token = secrets.token_urlsafe(32)
             token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
             now = datetime.now(timezone.utc)

@@ -1,4 +1,6 @@
-from sqlalchemy import select
+from uuid import UUID
+
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.application.errors import PasswordResetTokenNotFoundError
@@ -46,3 +48,10 @@ class SqlAlchemyPasswordResetTokenRepository:
             raise PasswordResetTokenNotFoundError()
 
         model.used_at = token.used_at
+
+    def delete_unused_for_user(self, user_id: UUID) -> None:
+        stmt = delete(PasswordResetTokenModel).where(
+            PasswordResetTokenModel.user_id == user_id,
+            PasswordResetTokenModel.used_at.is_(None),
+        )
+        self.session.execute(stmt)
