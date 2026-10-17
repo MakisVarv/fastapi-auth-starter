@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "485f435021dc6ec77f7de285f66cfeb2cd07004b6d830ef6fceffa512117c84f"
+            "sha256": "1b2257a6740716b65a71e319f19ae5aaf4db3f4028020df1a1d30f03e81c6235"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -271,6 +271,9 @@
             "version": "==3.20"
         },
         "limits": {
+            "extras": [
+                "redis"
+            ],
             "hashes": [
                 "sha256:ae1b008a43eb43073c3c579398bd4eb4c795de60952532dc24720ab45e1ac6b8",
                 "sha256:c9e0d74aed837e8f6f50d1fcebcf5fd8130957287206bc3799adaee5092655da"
@@ -639,6 +642,14 @@
             ],
             "markers": "python_version >= '3.10'",
             "version": "==1.2.3"
+        },
+        "redis": {
+            "hashes": [
+                "sha256:1a1df5067062cf7cbe677994e391f8ee0840f499d370f1a71266e0dd3aa9308e",
+                "sha256:1fa4647af1c5e93a2c685aa248ee44cce092691146d41390518dabe9a99839b0"
+            ],
+            "markers": "python_version >= '3.10'",
+            "version": "==7.4.1"
         },
         "slowapi": {
             "hashes": [

@@ -21,6 +21,8 @@ class Settings(BaseSettings):
 
     FRONTEND_ORIGIN: str
 
+    REDIS_URL: str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
