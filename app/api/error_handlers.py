@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.application.errors import (
     ActiveUserDeletionError,
@@ -189,6 +191,17 @@ def request_validation_error_handler(request: Request, exc: Exception) -> JSONRe
     )
 
 
+def rate_limit_exception_handler(
+    request: Request,
+    exc: Exception,
+) -> Response:
+
+    if not isinstance(exc, RateLimitExceeded):
+        raise exc
+
+    return _rate_limit_exceeded_handler(request, exc)
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     for exception_type in ERROR_RESPONSES:
         app.add_exception_handler(
@@ -202,4 +215,8 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         AuthorizationError,
         authorization_error_handler,
+    )
+    app.add_exception_handler(
+        RateLimitExceeded,
+        rate_limit_exception_handler,
     )

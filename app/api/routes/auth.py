@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Cookie, Depends, Header, Response
+from fastapi import APIRouter, Cookie, Depends, Header, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.dependencies.auth import (
@@ -36,6 +36,7 @@ from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
 from app.api.security.auth_cookies import clear_auth_cookies
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
+from app.api.security.rate_limiting import limiter
 from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
 from app.application.use_cases.auth.change_email import ChangeEmail
 from app.application.use_cases.auth.login_user import LoginUser
@@ -51,7 +52,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("10/hour")
 def register(
+    request: Request,
     payload: RegisterRequest,
     use_case: RegisterUser = Depends(get_register_user),
 ) -> UserResponse:
@@ -67,7 +70,9 @@ def register(
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     payload: LoginRequest,
     response: Response,
     use_case: LoginUser = Depends(get_login_user),
@@ -169,7 +174,9 @@ def refresh(
 
 
 @router.post("/reauthenticate", response_model=AccessTokenResponse)
+@limiter.limit("5/minute")
 def reauthenticate(
+    request: Request,
     response: Response,
     payload: ReauthenticateRequest,
     use_case: ReauthenticateUser = Depends(get_reauthenticate_user),
@@ -210,7 +217,9 @@ def change_email(
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
+@limiter.limit("3/15minutes")
 def request_password_reset(
+    request: Request,
     payload: ForgotPasswordRequest,
     use_case: RequestPasswordReset = Depends(get_request_password_reset),
 ) -> MessageResponse:
@@ -221,7 +230,9 @@ def request_password_reset(
 
 
 @router.post("/reset-password", response_model=MessageResponse)
+@limiter.limit("5/minute")
 def reset_password(
+    request: Request,
     payload: ResetPasswordRequest,
     use_case: ResetPassword = Depends(get_reset_password),
 ) -> MessageResponse:

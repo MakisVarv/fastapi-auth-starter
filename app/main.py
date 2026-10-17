@@ -8,9 +8,11 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.permissions import router as permission_router
 from app.api.routes.roles import router as role_router
 from app.api.routes.users import router as user_router
+from app.api.security.rate_limiting import limiter
 from app.infrastructure.config import settings
 
 app = FastAPI()
+app.state.limiter = limiter
 register_exception_handlers(app)
 
 app.add_middleware(
@@ -20,6 +22,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
