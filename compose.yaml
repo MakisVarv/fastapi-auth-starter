@@ -8,6 +8,10 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
+    networks:
+      default:
+        ipv4_address: 172.30.200.10
+
     depends_on:
       api:
         condition: service_started
@@ -21,6 +25,7 @@ services:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/fastapi_starter_db
       REDIS_URL: redis://redis:6379/0
       SMTP_HOST: mailpit
+      FORWARDED_ALLOW_IPS: '172.30.200.10'
 
     depends_on:
       init:
@@ -59,7 +64,8 @@ services:
 
     healthcheck:
       test:
-        ['CMD-SHELL', 'pg_isready -U postgres -d fastapi_starter_db']
+        - CMD-SHELL
+        - pg_isready -U postgres -d fastapi_starter_db
       interval: 5s
       timeout: 5s
       retries: 5
@@ -75,3 +81,9 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.200.0/24
