@@ -2,35 +2,65 @@ services:
   api:
     build: .
     ports:
-      - '8000:8000'
+      - '127.0.0.1:8000:8000'
+
     env_file: .env
+
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/fastapi_starter_db
       REDIS_URL: redis://redis:6379/0
       SMTP_HOST: mailpit
+
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+      redis:
+        condition: service_started
+
+      mailpit:
+        condition: service_started
+
+  init:
+    build: .
+
+    command: ['sh', 'scripts/init.sh']
+
+    env_file: .env
+
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/fastapi_starter_db
+
     depends_on:
       db:
         condition: service_healthy
+
   db:
     image: postgres:17-alpine
+
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: fastapi_starter_db
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
       test:
         ['CMD-SHELL', 'pg_isready -U postgres -d fastapi_starter_db']
       interval: 5s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:7-alpine
 
   mailpit:
     image: axllent/mailpit:latest
+
     ports:
       - '127.0.0.1:8026:8025'
+
 volumes:
   postgres_data:
