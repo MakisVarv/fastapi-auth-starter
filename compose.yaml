@@ -22,7 +22,7 @@ services:
     env_file: .env
 
     environment:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/fastapi_starter_db
+      DATABASE_URL: 'postgresql+psycopg://${POSTGRES_USER:?POSTGRES_USER required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@db:5432/${POSTGRES_DB:?POSTGRES_DB required}'
       REDIS_URL: redis://redis:6379/0
       SMTP_HOST: mailpit
       FORWARDED_ALLOW_IPS: '172.30.200.10'
@@ -45,7 +45,7 @@ services:
     env_file: .env
 
     environment:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@db:5432/fastapi_starter_db
+      DATABASE_URL: 'postgresql+psycopg://${POSTGRES_USER:?POSTGRES_USER required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}@db:5432/${POSTGRES_DB:?POSTGRES_DB required}'
 
     depends_on:
       db:
@@ -55,9 +55,9 @@ services:
     image: postgres:17-alpine
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fastapi_starter_db
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB required}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -65,7 +65,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - pg_isready -U postgres -d fastapi_starter_db
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
       interval: 5s
       timeout: 5s
       retries: 5
