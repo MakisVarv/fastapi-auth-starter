@@ -1,3 +1,5 @@
+from venv import logger
+
 from fastapi import APIRouter, Cookie, Depends, Header, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -37,7 +39,11 @@ from app.api.schemas.user import UserResponse
 from app.api.security.auth_cookies import clear_auth_cookies
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
 from app.api.security.rate_limiting import limiter
-from app.application.errors import InvalidAccessTokenError, InvalidRefreshTokenError
+from app.application.errors import (
+    InvalidAccessTokenError,
+    InvalidRefreshTokenError,
+    PasswordResetDeliveryError,
+)
 from app.application.use_cases.auth.change_email import ChangeEmail
 from app.application.use_cases.auth.login_user import LoginUser
 from app.application.use_cases.auth.logout_session import LogoutSession
@@ -223,7 +229,10 @@ def request_password_reset(
     payload: ForgotPasswordRequest,
     use_case: RequestPasswordReset = Depends(get_request_password_reset),
 ) -> MessageResponse:
-    use_case.execute(email=payload.email)
+    try:
+        use_case.execute(email=payload.email)
+    except PasswordResetDeliveryError:
+        logger.exception("Password reset email delivery failed.")
     return MessageResponse(
         message="If an account exists for this email, password reset instructions will be sent."
     )
