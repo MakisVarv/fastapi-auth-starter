@@ -1,4 +1,4 @@
-from venv import logger
+import logging
 
 from fastapi import APIRouter, Cookie, Depends, Header, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
@@ -55,6 +55,8 @@ from app.domain.entities.user import User
 from app.infrastructure.config import settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register", response_model=UserResponse)
