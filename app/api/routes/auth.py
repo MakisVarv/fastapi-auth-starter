@@ -38,7 +38,11 @@ from app.api.schemas.common import MessageResponse
 from app.api.schemas.user import UserResponse
 from app.api.security.auth_cookies import clear_auth_cookies
 from app.api.security.csrf import generate_csrf_token, verify_csrf_token
-from app.api.security.rate_limiting import limiter
+from app.api.security.rate_limiting import (
+    get_email_rate_limit_key,
+    limiter,
+    prepare_email_rate_limit,
+)
 from app.application.errors import (
     InvalidAccessTokenError,
     InvalidRefreshTokenError,
@@ -77,8 +81,13 @@ def register(
     return UserResponse.model_validate(user)
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post(
+    "/login",
+    dependencies=[Depends(prepare_email_rate_limit)],
+    response_model=LoginResponse,
+)
 @limiter.limit("5/minute")
+@limiter.limit("10/15minutes", key_func=get_email_rate_limit_key)
 def login(
     request: Request,
     payload: LoginRequest,
@@ -224,8 +233,13 @@ def change_email(
     return MessageResponse(message="Email changed successfully.")
 
 
-@router.post("/forgot-password", response_model=MessageResponse)
+@router.post(
+    "/forgot-password",
+    dependencies=[Depends(prepare_email_rate_limit)],
+    response_model=MessageResponse,
+)
 @limiter.limit("3/15minutes")
+@limiter.limit("10/15minutes", key_func=get_email_rate_limit_key)
 def request_password_reset(
     request: Request,
     payload: ForgotPasswordRequest,
