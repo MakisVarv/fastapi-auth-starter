@@ -3,6 +3,8 @@ import ssl
 from email.message import EmailMessage
 from urllib.parse import urlencode
 
+from app.application.errors import PasswordResetDeliveryError
+
 
 class SmtpPasswordResetMailer:
 
@@ -55,23 +57,25 @@ class SmtpPasswordResetMailer:
     If you didn't request this, you can ignore this email.
     """)
 
-        # 3. Connect to the SMTP server
-        with smtplib.SMTP(
-            self.smtp_host,
-            self.smtp_port,
-            timeout=10,
-        ) as server:
+        try:
+            # 3. Connect to the SMTP server
+            with smtplib.SMTP(
+                self.smtp_host,
+                self.smtp_port,
+                timeout=10,
+            ) as server:
+                # 4. Upgrade the connection to TLS
+                if self.use_starttls:
+                    server.starttls(context=ssl.create_default_context())
 
-            # 4. Upgrade the connection to TLS
-            if self.use_starttls:
-                server.starttls(context=ssl.create_default_context())
+                # 5. Authenticate if credentials are configured
+                if self.smtp_username and self.smtp_password:
+                    server.login(
+                        self.smtp_username,
+                        self.smtp_password,
+                    )
 
-            # 5. Authenticate if credentials are configured
-            if self.smtp_username and self.smtp_password:
-                server.login(
-                    self.smtp_username,
-                    self.smtp_password,
-                )
-
-            # 6. Send the email
-            server.send_message(message)
+                # 6. Send the email
+                server.send_message(message)
+        except (smtplib.SMTPException, OSError) as exc:
+            raise PasswordResetDeliveryError() from exc
