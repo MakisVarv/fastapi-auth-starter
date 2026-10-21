@@ -28,6 +28,12 @@ jobs:
         run: pipenv sync --dev
       - name: Apply database migrations
         run: pipenv run alembic upgrade head
+      - name: Ruff
+        run: pipenv run ruff check .
+      - name: Black
+        run: pipenv run black --check .
+      - name: Run tests
+        run: pipenv run pytest
     services:
       postgres:
         image: postgres:17-alpine
@@ -41,6 +47,17 @@ jobs:
 
         options: >-
           --health-cmd "pg_isready -U postgres -d fastapi_starter_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+
+        ports:
+          - 6379:6379
+
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
