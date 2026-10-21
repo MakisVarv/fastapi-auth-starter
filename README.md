@@ -1,202 +1,193 @@
-# FastAPI Authentication & Authorization Backend
+# FastAPI Authentication & Authorization Starter
 
-> **Status:** In progress
+[![CI](https://github.com/MakisVarv/fastapi-auth-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/MakisVarv/fastapi-auth-starter/actions/workflows/ci.yml)
 
-A reusable backend-focused authentication and authorization system built with **FastAPI** to practice production-oriented application structure, explicit dependency boundaries, and maintainable security workflows.
+A reusable **FastAPI backend foundation** for authentication, authorization, and user administration, built with **Clean Architecture** principles. The project separates business rules from HTTP handling, persistence, and external services so that authentication and permission workflows remain maintainable and testable.
 
-The project is intentionally designed around **Clean Architecture principles** rather than framework-first organization, keeping domain and application logic independent from FastAPI, SQLAlchemy, and other infrastructure concerns.
+**Status:** Core functionality implemented and CI-verified. Designed as a production-oriented starter and learning/reference project—not a publicly deployed, production-operated service.
 
----
+## Features
 
-## Overview
+### Authentication and account security
 
-This project implements a reusable authentication and authorization backend with a strong emphasis on architecture and separation of concerns.
+- Registration, login, and current-user profile retrieval and updates.
+- JWT access tokens with refresh tokens stored in `HttpOnly` cookies.
+- Server-side authentication sessions, refresh-token rotation, and replay detection.
+- Logout and logout from all sessions.
+- Reauthentication and fresh-authentication checks for sensitive operations.
+- Password and email changes.
+- Forgot-password and reset-password workflows with SMTP email delivery.
+- CSRF protection for cookie-based refresh and logout operations.
+- Argon2 password hashing.
+- Rate limiting backed by Redis, including IP-based limits and normalized-email limits on login and forgot-password requests.
 
-The current implementation includes:
+### Authorization and administration
 
-- User registration
-- Login
-- Refresh-token flow
-- Current-user authentication
-- Role and permission domain modeling
-- Application-level permission checks
-- FastAPI dependency-based authorization infrastructure
-- Repository abstractions
-- Unit of Work pattern
-- SQLAlchemy persistence
-- JWT-based token handling
-- Centralized application error handling
-
-Authorization is designed so that business rules remain in the application/domain layers while FastAPI is responsible only for request-time composition.
-
----
+- Role-based access control (RBAC) with a developer-defined permission registry.
+- Role hierarchy and target-aware authorization rules.
+- Role management, permission assignment/removal, and protection for built-in roles.
+- Permission synchronization against the application registry.
+- User creation, retrieval, updating, deletion, activation/deactivation, and role assignment.
+- User listing with pagination, filtering, searching, and sorting.
+- Centralized HTTP error handling and request validation.
 
 ## Architecture
 
-The project follows a Clean Architecture style with dependencies pointing inward:
+The codebase follows Clean Architecture: application use cases coordinate behavior through contracts, while infrastructure provides concrete implementations.
 
 ```text
-Presentation / FastAPI
-        ↓
-Application / Use Cases
-        ↓
-Domain
-        ↑
-Infrastructure / SQLAlchemy, JWT, Persistence
+                  HTTP requests
+                        |
+                        v
+             API / FastAPI routes
+             schemas + dependencies
+                        |
+                        v
+                Application layer
+                use cases + ports
+                        |
+                        v
+                  Domain layer
+                entities + rules
+                        ^
+                        |
+        Infrastructure implements application ports
+        (SQLAlchemy, JWT, Argon2, SMTP, etc.)
 ```
 
-### Domain
+At runtime, FastAPI dependencies assemble use cases with their infrastructure adapters. The **dependency direction** stays inward: domain and application rules do not depend on FastAPI routes or SQLAlchemy models.
 
-Contains framework-independent business concepts such as users, roles, permissions, and repository contracts.
+| Directory             | Responsibility                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| `app/domain/`         | Core entities and business concepts                                                  |
+| `app/application/`    | Use cases, ports, and application-level rules                                        |
+| `app/infrastructure/` | Database, repositories, Unit of Work, tokens, hashing, mail, and configuration       |
+| `app/api/`            | Routes, request/response schemas, dependency composition, and HTTP error translation |
+| `alembic/`            | Database schema migrations                                                           |
+| `scripts/`            | Database initialization, seeding, and permission synchronization                     |
+| `tests/`              | Unit, API, and integration tests                                                     |
+| `nginx/`              | Local reverse-proxy configuration                                                    |
+| `.github/workflows/`  | Continuous integration                                                               |
 
-### Application
+**Patterns used:** Dependency Inversion, Repository, Unit of Work, application use cases, explicit dependency composition, and centralized exception translation.
 
-Contains use cases that coordinate application behavior.
+## Technology stack
 
-Examples currently include authentication workflows and permission authorization.
+| Area                | Tools                                       |
+| ------------------- | ------------------------------------------- |
+| API                 | Python 3.14, FastAPI, Pydantic              |
+| Persistence         | PostgreSQL 17, SQLAlchemy, Alembic, psycopg |
+| Security            | PyJWT, Argon2, SlowAPI, Redis               |
+| Email               | SMTP; Mailpit for local testing             |
+| Runtime             | Docker, Docker Compose, Nginx, Uvicorn      |
+| Development quality | Pipenv, pytest, Ruff, Black, GitHub Actions |
 
-### Infrastructure
+## Getting started (Docker Compose)
 
-Contains concrete implementations for external concerns such as:
+### Prerequisites
 
-- SQLAlchemy repositories
-- Database sessions
-- Unit of Work implementation
-- JWT token handling
+- Docker with Docker Compose support.
+- An available local port **8000** for the API and **8026** for Mailpit.
 
-### Presentation
+### 1. Clone and configure
 
-Contains FastAPI routes and dependency wiring.
-
-FastAPI dependencies are used as adapters between HTTP requests and application use cases rather than as a place for business logic.
-
----
-
-## Authentication Flow
-
-The authentication layer currently supports the main token lifecycle:
-
-```text
-Login
-  ↓
-credentials validated
-  ↓
-access token + refresh session
-  ↓
-authenticated requests
-  ↓
-access token resolved to current user
-  ↓
-refresh flow when required
+```bash
+git clone https://github.com/MakisVarv/fastapi-auth-starter.git
+cd fastapi-auth-starter
+cp .env.example .env
 ```
 
-The current-user dependency is responsible for request authentication, while application use cases remain independent of FastAPI.
+Edit `.env` before starting. In particular:
 
----
+- Replace `JWT_SECRET_KEY` and `CSRF_SECRET_KEY` with strong, distinct random values.
+- Change `POSTGRES_PASSWORD` from the example value.
+- Set a secure `ADMIN_PASSWORD` (at least eight characters) and review `ADMIN_EMAIL`.
+- Keep `COOKIE_SECURE=false` **only for local HTTP development**.
+- Review `FRONTEND_ORIGIN` and `FRONTEND_RESET_URL` for your environment. This repository does not include a frontend.
 
-## Authorization / RBAC
+`compose.yaml` overrides the database, Redis, and SMTP hosts with their internal service names, so the example `localhost` settings do not need to be changed for the Docker Compose setup.
 
-The project includes a role-based authorization model using users, roles, and permissions.
+### 2. Start the services
 
-The authorization flow is separated into two parts:
-
-```text
-Authentication
-get_current_user
-      ↓
-Authenticated User
-      ↓
-Authorization
-require_permission(...)
-      ↓
-RequirePermission use case
-      ↓
-Role / Permission domain logic
+```bash
+docker compose up --build -d
 ```
 
-A configurable FastAPI dependency factory has been added so future protected endpoints can declare required permissions without embedding RBAC logic inside route functions.
+Compose starts **PostgreSQL**, **Redis**, **Mailpit**, the **FastAPI application**, and **Nginx**. A one-off initialization service runs Alembic migrations, seeds the built-in roles and administrator, and synchronizes permissions before the API becomes available.
 
-Conceptually:
+### 3. Open the application
 
-```python
-dependencies=[Depends(require_permission("users:update"))]
+| Service                           | Local URL                          |
+| --------------------------------- | ---------------------------------- |
+| Interactive API docs (Swagger UI) | http://localhost:8000/docs         |
+| OpenAPI schema                    | http://localhost:8000/openapi.json |
+| Mailpit inbox                     | http://localhost:8026              |
+
+The API is served through Nginx on `127.0.0.1:8000`. Application routes are under `/api`, including `/api/auth`, `/api/users`, `/api/roles`, and `/api/permissions`.
+
+Use the configured administrator credentials to log in. For password-reset testing, Mailpit captures outgoing email locally; the reset link uses `FRONTEND_RESET_URL`, so a separate frontend would be needed to follow that link through a UI.
+
+### 4. Inspect logs or stop
+
+```bash
+docker compose logs -f api
+docker compose down
 ```
 
-The permission dependency is implemented, while route-level permission usage will be introduced when management endpoints requiring RBAC are added.
+`docker compose down` stops and removes containers but keeps the PostgreSQL named volume. To reset database data intentionally, use `docker compose down -v` **with care**, since it removes volumes.
 
----
+## API and authentication notes
 
-## Architectural Patterns
+- Pass access tokens to protected endpoints using `Authorization: Bearer <access_token>`.
+- Refresh tokens are managed through cookies rather than returned for client-side JavaScript storage.
+- Cookie-based refresh and logout requests require the `X-CSRF-TOKEN` header associated with the refresh cookie.
+- Permission-protected endpoints enforce both permission requirements and application-level authorization rules.
+- See **`/docs`** for the current endpoint schemas, request formats, and responses.
 
-This project currently applies:
+For example, login requests go to `POST /api/auth/login`; user administration routes are under `/api/users`.
 
-- **Clean Architecture principles**
-- **Dependency Inversion**
-- **Repository Pattern**
-- **Unit of Work Pattern**
-- **Dependency Injection / composition through FastAPI**
-- **Application Use Cases**
-- **Domain-oriented entities and contracts**
-- **Centralized error handling**
+## Development, tests, and CI
 
-The goal is not to introduce patterns for their own sake, but to keep business rules testable and independent from persistence and framework details.
+Install the locked development dependencies with **Python 3.14.4** and Pipenv:
 
----
+```bash
+python -m pip install pipenv
+pipenv sync --dev
+```
 
-## Tech Stack
+Run quality checks:
 
-### Backend
+```bash
+pipenv run ruff check .
+pipenv run black --check .
+```
 
-- Python
-- FastAPI
-- SQLAlchemy
-- PostgreSQL
-- Pydantic
-- PyJWT
-- Alembic
+Run tests:
 
-### Architecture
+```bash
+pipenv run pytest
+```
 
-- Clean Architecture
-- Repository Pattern
-- Unit of Work
-- Dependency Inversion
-- FastAPI dependency composition
+**Local test prerequisites:** The application reads its normal settings from `.env`; integration tests read `TEST_DATABASE_URL` from the environment or an optional `.env.test` file. For host-side test execution, supply a **separate, reachable PostgreSQL test database**. The default Docker Compose configuration does **not** publish PostgreSQL's port to the host. Redis should also be available for realistic rate-limiting behavior. Never point integration tests at a database containing data you need to keep.
 
----
+With an accessible test database and `TEST_DATABASE_URL` configured, migrations can be applied using:
 
-## Current Project Focus
+```bash
+pipenv run python -m scripts.upgrade_test_db
+```
 
-The project is still under active development.
+GitHub Actions runs on pushes and pull requests. Its workflow provisions temporary PostgreSQL and Redis services, installs dependencies from `Pipfile.lock`, applies migrations, checks Ruff and Black, and runs pytest. CI supplies configuration through environment variables rather than committing `.env` files.
 
-Current work is focused on completing the reusable authentication/authorization foundation and keeping the implementation consistent across:
+## Security and deployment scope
 
-- authentication
-- refresh-session handling
-- role and permission modeling
-- authorization boundaries
-- persistence
-- API error behavior
-- framework-to-application composition
+This is a **production-oriented foundation**, not a guarantee of production readiness in an arbitrary environment.
 
-Only implemented or actively integrated functionality is documented here. The README will be expanded further as the backend reaches a stable completion milestone.
+- The supplied Compose setup is intended for local development; public deployment requires HTTPS/TLS, secure cookies, appropriate reverse-proxy and network configuration, and properly managed secrets.
+- Production operation also needs environment-specific logging/monitoring, backups, availability planning, and deployment procedures.
+- Local Mailpit delivery is for development; configure a real SMTP service for deployment.
+- Features such as email verification, security audit logging, and a session-management dashboard are intentionally outside this starter's scope.
+- The included configuration and permissions should be reviewed against the requirements of any application that reuses this foundation.
 
----
+## Project purpose
 
-## Purpose
-
-This project is primarily a backend architecture and engineering exercise.
-
-Its purpose is to demonstrate how authentication and authorization logic can be implemented while keeping:
-
-- domain rules independent from FastAPI
-- persistence behind abstractions
-- database transactions explicit
-- authentication separate from authorization
-- route handlers thin
-- infrastructure replaceable
-- application behavior organized around use cases
-
-The same frontend-facing authentication contract can later be consumed by a React/TypeScript client without coupling the frontend to the internal backend architecture.
-
----
+This project demonstrates how to build and test authentication and authorization workflows while keeping business logic independent of frameworks and infrastructure. It is intended to be reused or adapted as a starting point for backend applications—not as a one-size-fits-all identity service.
