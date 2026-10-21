@@ -26,6 +26,8 @@ jobs:
           pipenv --version
       - name: Install dependencies
         run: pipenv sync --dev
+      - name: Apply database migrations
+        run: pipenv run alembic upgrade head
     services:
       postgres:
         image: postgres:17-alpine
