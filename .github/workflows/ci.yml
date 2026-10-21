@@ -24,3 +24,9 @@ jobs:
         run: |
           python --version
           pipenv --version
+      - name: Install dependencies
+        run: pipenv sync --dev
+      - name: Verify environment
+        run: |
+          python --version
+          pipenv --version
